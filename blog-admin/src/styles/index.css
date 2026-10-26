@@ -1,0 +1,59 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    'Helvetica Neue',
+    Helvetica,
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei',
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  color: #303133;
+  background-color: #f0f2f5;
+}
+
+/* 页面通用容器 */
+.page-container {
+  padding: 4px 0 20px;
+}
+
+/* 表格上方工具栏 */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.table-toolbar .spacer {
+  flex: 1;
+}
+
+/* 分页右对齐 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* 数字加粗大字 */
+.stat-number {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
