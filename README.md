@@ -4,6 +4,20 @@
 
 设计与实现依据：[docs/设计文档.md](docs/设计文档.md)。
 
+## 项目截图
+
+**前台门户 · 首页**（文章卡片流 + 站点统计/热门文章侧栏）
+
+![前台首页](docs/images/front-home.png)
+
+**前台门户 · 文章详情**（Markdown 渲染 + 代码高亮 + 自动目录 + 两级评论区）
+
+![文章详情](docs/images/article-detail.png)
+
+**后台管理 · 数据看板**（统计卡片 + 最新评论）
+
+![后台看板](docs/images/admin-dashboard.png)
+
 ## 目录结构
 
 ```
