@@ -26,4 +26,10 @@ public class DashboardVO {
     private Long totalLikes;
 
     private List<AdminCommentVO> latestComments;
+
+    /** 浏览量 Top 5 文章（已发布） */
+    private List<ArticleRankVO> topArticles;
+
+    /** 各分类已发布文章数（仅含文章数大于 0 的分类） */
+    private List<CategoryStatVO> categoryDistribution;
 }

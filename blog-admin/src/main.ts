@@ -1,8 +1,13 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import { vLoading as ElLoadingDirective } from 'element-plus/es/components/loading/index.mjs'
+
+// 按需引入下，命令式 API（ElMessage/ElMessageBox）与 v-loading 指令的样式/注册需手动处理
+import 'element-plus/es/components/message/style/css'
+import 'element-plus/es/components/message-box/style/css'
+import 'element-plus/es/components/notification/style/css'
+import 'element-plus/es/components/loading/style/css'
+
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import App from './App.vue'
@@ -13,7 +18,8 @@ const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
-app.use(ElementPlus, { locale: zhCn })
+// v-loading 指令（按需引入需手动注册）
+app.directive('loading', ElLoadingDirective)
 
 // 全局注册 Element Plus 图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

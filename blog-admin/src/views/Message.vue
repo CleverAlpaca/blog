@@ -56,7 +56,8 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
+import { ElMessageBox } from 'element-plus/es/components/message-box/index.mjs'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import { pageMessages, updateMessageStatus, deleteMessage } from '@/api/message'
 import { formatDateTime } from '@/utils/format'

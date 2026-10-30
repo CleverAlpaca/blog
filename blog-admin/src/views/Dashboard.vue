@@ -15,6 +15,28 @@
       </el-card>
     </div>
 
+    <!-- 图表区 -->
+    <el-row :gutter="16" class="chart-row">
+      <el-col :xs="24" :md="12">
+        <el-card shadow="never" class="chart-card">
+          <template #header>
+            <span class="card-title">热门文章 Top 5（浏览量）</span>
+          </template>
+          <div v-if="(dashboard?.topArticles || []).length" ref="topChartRef" class="chart-box"></div>
+          <el-empty v-else description="暂无文章数据" :image-size="80" />
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :md="12">
+        <el-card shadow="never" class="chart-card">
+          <template #header>
+            <span class="card-title">分类文章分布</span>
+          </template>
+          <div v-if="(dashboard?.categoryDistribution || []).length" ref="pieChartRef" class="chart-box"></div>
+          <el-empty v-else description="暂无文章数据" :image-size="80" />
+        </el-card>
+      </el-col>
+    </el-row>
+
     <!-- 最新评论 -->
     <el-card shadow="never" class="latest-card">
       <template #header>
@@ -34,13 +56,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import * as echarts from 'echarts/core'
+import { BarChart, PieChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 import { getDashboard } from '@/api/dashboard'
 import { formatDateTime } from '@/utils/format'
 import type { DashboardData } from '@/api/types'
 
+// ECharts 按需注册（本页只用条形图/饼图/网格/提示框/图例）
+echarts.use([BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
+
 const loading = ref(false)
 const dashboard = ref<DashboardData | null>(null)
+
+const topChartRef = ref<HTMLDivElement>()
+const pieChartRef = ref<HTMLDivElement>()
+let topChart: ReturnType<typeof echarts.init> | null = null
+let pieChart: ReturnType<typeof echarts.init> | null = null
 
 const statCards = computed(() => [
   { label: '发布文章', value: dashboard.value?.publishedCount ?? 0, icon: 'Document', color: '#409eff', bg: '#ecf5ff' },
@@ -54,7 +88,57 @@ const statCards = computed(() => [
   { label: '友链数量', value: dashboard.value?.friendLinkCount ?? 0, icon: 'Link', color: '#909399', bg: '#f4f4f5' }
 ])
 
+const renderCharts = (): void => {
+  if (!dashboard.value) return
+  const topList = dashboard.value.topArticles || []
+  if (topList.length && topChartRef.value) {
+    topChart = topChart ?? echarts.init(topChartRef.value)
+    topChart.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      grid: { left: 8, right: 28, top: 10, bottom: 10, containLabel: true },
+      xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { type: 'dashed' } } },
+      yAxis: {
+        type: 'category',
+        inverse: true,
+        data: topList.map(a => a.title),
+        axisLabel: { width: 110, overflow: 'truncate' }
+      },
+      series: [{
+        name: '浏览量',
+        type: 'bar',
+        data: topList.map(a => a.views),
+        barMaxWidth: 16,
+        itemStyle: { color: '#409eff', borderRadius: [0, 6, 6, 0] }
+      }]
+    })
+  }
+  const distList = dashboard.value.categoryDistribution || []
+  if (distList.length && pieChartRef.value) {
+    pieChart = pieChart ?? echarts.init(pieChartRef.value)
+    pieChart.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}：{c} 篇（{d}%）' },
+      legend: { bottom: 0, icon: 'circle' },
+      series: [{
+        name: '分类文章分布',
+        type: 'pie',
+        radius: ['42%', '68%'],
+        center: ['50%', '44%'],
+        avoidLabelOverlap: true,
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+        label: { show: false },
+        data: distList.map(c => ({ name: c.name, value: c.count }))
+      }]
+    })
+  }
+}
+
+const handleResize = (): void => {
+  topChart?.resize()
+  pieChart?.resize()
+}
+
 onMounted(async () => {
+  window.addEventListener('resize', handleResize)
   loading.value = true
   try {
     dashboard.value = await getDashboard()
@@ -63,6 +147,17 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+// 数据返回后等 DOM 渲染出图表容器再画图
+watch(dashboard, () => nextTick(renderCharts))
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  topChart?.dispose()
+  pieChart?.dispose()
+  topChart = null
+  pieChart = null
 })
 </script>
 
@@ -102,6 +197,15 @@ onMounted(async () => {
   margin-top: 4px;
   font-size: 13px;
   color: #909399;
+}
+
+.chart-row {
+  margin-bottom: 16px;
+}
+
+.chart-box {
+  height: 300px;
+  width: 100%;
 }
 
 .latest-card .card-title {

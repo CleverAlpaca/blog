@@ -101,7 +101,8 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
+import { ElMessageBox } from 'element-plus/es/components/message-box/index.mjs'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { pageArticles, deleteArticle, setArticleTop } from '@/api/article'
 import { listCategories } from '@/api/category'

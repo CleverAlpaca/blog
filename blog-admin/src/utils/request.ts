@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
-import { ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
 import router from '@/router'
 
 export const TOKEN_KEY = 'admin_token'

@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
 import { uploadImage, validateImage } from '@/api/upload'
 
 const props = withDefaults(

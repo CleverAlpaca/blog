@@ -43,7 +43,9 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
+import { ElMessageBox } from 'element-plus/es/components/message-box/index.mjs'
 import { Plus } from '@element-plus/icons-vue'
 import { listTags, createTag, updateTag, deleteTag } from '@/api/tag'
 import type { TagItem } from '@/api/types'

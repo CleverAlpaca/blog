@@ -55,7 +55,9 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
+import { ElMessageBox } from 'element-plus/es/components/message-box/index.mjs'
 import { Plus } from '@element-plus/icons-vue'
 import { listCategories, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import type { CategoryItem } from '@/api/types'

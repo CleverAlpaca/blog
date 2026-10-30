@@ -164,6 +164,19 @@ export interface FriendLinkSaveParams {
   status?: number
 }
 
+/** 看板图表：单篇文章浏览量（ArticleRankVO） */
+export interface ArticleRank {
+  id: number
+  title: string
+  views: number
+}
+
+/** 看板图表：单个分类的文章数（CategoryStatVO） */
+export interface CategoryStat {
+  name: string
+  count: number
+}
+
 /** ===== 看板 ===== */
 
 export interface DashboardData {
@@ -177,4 +190,8 @@ export interface DashboardData {
   totalViews: number
   totalLikes: number
   latestComments: AdminComment[]
+  /** 浏览量 Top 5 文章（已发布） */
+  topArticles: ArticleRank[]
+  /** 各分类已发布文章数（仅含文章数大于 0 的分类） */
+  categoryDistribution: CategoryStat[]
 }

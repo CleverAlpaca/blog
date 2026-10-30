@@ -78,7 +78,9 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage } from 'element-plus/es/components/message/index.mjs'
+import { ElMessageBox } from 'element-plus/es/components/message-box/index.mjs'
 import ImageUpload from '@/components/ImageUpload.vue'
 import { getProfile, updateProfile, updatePassword } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
