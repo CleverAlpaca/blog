@@ -14,7 +14,7 @@
 
 ![文章详情](docs/images/article-detail.png)
 
-**后台管理 · 数据看板**（统计卡片 + 最新评论）
+**后台管理 · 数据看板**（统计卡片 + 浏览量 Top5 / 分类分布图表 + 最新评论）
 
 ![后台看板](docs/images/admin-dashboard.png)
 
