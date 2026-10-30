@@ -95,7 +95,7 @@ const coverUrl = computed(() => {
   flex-shrink: 0;
   border-radius: 10px;
   overflow: hidden;
-  background: #eef1f6;
+  background: var(--color-cover-soft);
 }
 
 .cover img {

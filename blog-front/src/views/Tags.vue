@@ -57,7 +57,7 @@ function sizeClass(count?: number | null): string {
   padding: 7px 16px;
   border-radius: 999px;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-card);
   color: var(--color-text-secondary);
   transition: all 0.22s ease;
 }
@@ -95,7 +95,7 @@ function sizeClass(count?: number | null): string {
   height: 18px;
   padding: 0 6px;
   border-radius: 999px;
-  background: #f1f3f8;
+  background: var(--color-chip);
   color: var(--color-text-tertiary);
   font-size: 11.5px;
 }

@@ -104,7 +104,7 @@ function coverLetter(title: string): string {
 .site-card {
   padding: 24px 20px;
   text-align: center;
-  background: linear-gradient(180deg, #fdfdff 0%, #f7f8ff 100%);
+  background: var(--color-card);
 }
 
 .author {
@@ -119,7 +119,7 @@ function coverLetter(title: string): string {
   height: 72px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
+  border: 3px solid var(--color-card);
   box-shadow: var(--shadow-card);
 }
 
@@ -198,7 +198,7 @@ function coverLetter(title: string): string {
   align-items: center;
   gap: 10px;
   padding: 10px 2px;
-  border-bottom: 1px solid #f1f3f8;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .hot-item:last-child {
@@ -213,25 +213,25 @@ function coverLetter(title: string): string {
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #f1f3f8;
+  background: var(--color-chip);
   color: var(--color-text-tertiary);
   font-size: 12px;
   font-weight: 700;
 }
 
 .rank-1 {
-  background: #fee2e2;
-  color: #ef4444;
+  background: var(--danger-soft);
+  color: var(--color-danger);
 }
 
 .rank-2 {
-  background: #ffedd5;
-  color: #f97316;
+  background: var(--rank-2-bg);
+  color: var(--rank-2-text);
 }
 
 .rank-3 {
-  background: #fef9c3;
-  color: #eab308;
+  background: var(--rank-3-bg);
+  color: var(--rank-3-text);
 }
 
 .hot-title {

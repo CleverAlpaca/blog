@@ -7,6 +7,9 @@ import { mdHeadingId, sanitizeHtml } from '@/utils/markdown'
 import LoadState from '@/components/LoadState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import { MdPreview } from 'md-editor-v3'
+import { useTheme } from '@/composables/useTheme'
+
+const { theme } = useTheme()
 
 usePageTitle('关于')
 const { data, loading, error, run } = useRequest<About>(getAbout)
@@ -54,7 +57,7 @@ function avatarUrl(avatar?: string | null): string {
         <div v-if="data.content" class="card content-card">
           <MdPreview
             :model-value="data.content"
-            theme="light"
+            :theme="theme"
             preview-theme="github"
             code-theme="github"
             :md-heading-id="mdHeadingId"
@@ -73,7 +76,7 @@ function avatarUrl(avatar?: string | null): string {
   gap: 20px;
   padding: 28px 24px;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, #fdfdff 0%, #f4f6ff 100%);
+  background: var(--color-card);
 }
 
 .avatar {
@@ -82,7 +85,7 @@ function avatarUrl(avatar?: string | null): string {
   flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
+  border: 3px solid var(--color-card);
   box-shadow: var(--shadow-card);
 }
 

@@ -103,12 +103,12 @@ defineExpose({
   border: 1px solid var(--color-border);
   border-radius: var(--radius-small);
   padding: 14px;
-  background: #fafbfd;
+  background: var(--form-soft);
 }
 
 .comment-form.compact {
   padding: 10px;
-  background: #f7f8fd;
+  background: var(--color-blockquote-bg);
 }
 
 .reply-banner {

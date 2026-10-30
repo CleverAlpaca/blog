@@ -92,7 +92,7 @@ function logoUrl(logo?: string | null): string {
   border-radius: 12px;
   object-fit: cover;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-card);
 }
 
 .logo-fallback {

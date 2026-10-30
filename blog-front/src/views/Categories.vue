@@ -88,7 +88,7 @@ const { data, loading, error, run } = useRequest<Category[]>(getCategoryList)
   height: 20px;
   padding: 0 8px;
   border-radius: 999px;
-  background: #f1f3f8;
+  background: var(--color-chip);
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 500;

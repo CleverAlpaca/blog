@@ -7,6 +7,7 @@ import { getArticleDetail, toggleLike } from '@/api/article'
 import { getCommentTree, postComment } from '@/api/comment'
 import type { CommentPost } from '@/types/api'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useTheme } from '@/composables/useTheme'
 import { formatCount, formatDateTime } from '@/utils/format'
 import { buildToc, mdHeadingId, sanitizeHtml } from '@/utils/markdown'
 import type { TocItem } from '@/types/api'
@@ -17,6 +18,7 @@ import CommentSection from '@/components/CommentSection.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
+const { theme } = useTheme()
 usePageTitle(() => detail.value?.title || '文章详情')
 
 const articleId = computed(() => {
@@ -143,7 +145,7 @@ const hasNext = computed(() => Boolean(detail.value?.nextId))
             <MdPreview
               v-if="detail.content"
               :model-value="detail.content"
-              theme="light"
+              :theme="theme"
               preview-theme="github"
               code-theme="github"
               :md-heading-id="mdHeadingId"
@@ -249,8 +251,8 @@ const hasNext = computed(() => Boolean(detail.value?.nextId))
   gap: 3px;
   padding: 1px 8px;
   border-radius: 999px;
-  background: #fee2e2;
-  color: #ef4444;
+  background: var(--danger-soft);
+  color: var(--color-danger);
   font-weight: 600;
 }
 
@@ -285,7 +287,7 @@ const hasNext = computed(() => Boolean(detail.value?.nextId))
   padding: 10px 26px;
   border-radius: 999px;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-card);
   font-size: 15px;
   color: var(--color-text-secondary);
   box-shadow: var(--shadow-card);

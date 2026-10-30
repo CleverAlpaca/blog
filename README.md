@@ -14,6 +14,10 @@
 
 ![文章详情](docs/images/article-detail.png)
 
+**前台门户 · 暗黑模式**（一键切换、跟随系统偏好、Markdown 暗色渲染）
+
+![暗黑模式](docs/images/dark-home.png)
+
 **后台管理 · 数据看板**（统计卡片 + 浏览量 Top5 / 分类分布图表 + 最新评论）
 
 ![后台看板](docs/images/admin-dashboard.png)

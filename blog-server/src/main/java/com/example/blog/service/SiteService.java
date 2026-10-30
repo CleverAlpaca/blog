@@ -10,4 +10,7 @@ public interface SiteService {
 
     /** 站点统计 */
     SiteStatsVO stats();
+
+    /** RSS 2.0 订阅源（最新 20 篇已发布文章） */
+    String rss();
 }

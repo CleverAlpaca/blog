@@ -39,7 +39,7 @@ function initial(node: CommentNode): string {
 <style scoped>
 .comment-item {
   padding: 14px 0;
-  border-bottom: 1px solid #f1f3f8;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .comment-item:last-child {
@@ -103,7 +103,7 @@ function initial(node: CommentNode): string {
 .replies {
   margin: 4px 0 0 40px;
   padding-left: 12px;
-  border-left: 2px solid #eef0f6;
+  border-left: 2px solid var(--color-border);
 }
 
 .replies .head {

@@ -2,8 +2,11 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSiteStore } from '@/stores/site'
+import { useTheme } from '@/composables/useTheme'
 import AppIcon from '@/components/AppIcon.vue'
 import AppToast from '@/components/AppToast.vue'
+
+const { theme, toggleTheme } = useTheme()
 
 const route = useRoute()
 const router = useRouter()
@@ -92,6 +95,16 @@ const year = new Date().getFullYear()
         <input v-model="keyword" type="search" placeholder="搜索文章，回车确认" aria-label="搜索文章" />
       </form>
 
+      <button
+        class="theme-toggle"
+        type="button"
+        :aria-label="theme === 'dark' ? '切换为亮色模式' : '切换为暗色模式'"
+        :title="theme === 'dark' ? '切换为亮色模式' : '切换为暗色模式'"
+        @click="toggleTheme"
+      >
+        <AppIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="17" />
+      </button>
+
       <button class="menu-toggle" type="button" :aria-expanded="menuOpen" aria-label="打开菜单" @click="menuOpen = !menuOpen">
         <AppIcon :name="menuOpen ? 'x' : 'menu'" :size="20" />
       </button>
@@ -139,6 +152,11 @@ const year = new Date().getFullYear()
       <p class="footer-line muted">
         <span class="beian">X ICP 备 00000000 号-1</span>
         <span class="divider">|</span>
+        <a class="footer-rss" href="/api/front/rss.xml" target="_blank" title="RSS 订阅">
+          <AppIcon name="rss" :size="12" />
+          RSS
+        </a>
+        <span class="divider">|</span>
         <span>Powered by Vue 3 &amp; Spring Boot 3</span>
       </p>
     </div>
@@ -152,7 +170,7 @@ const year = new Date().getFullYear()
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
@@ -253,7 +271,7 @@ const year = new Date().getFullYear()
 
 .search-box:focus-within {
   border-color: var(--color-primary);
-  background: #fff;
+  background: var(--color-card);
   box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 
@@ -281,6 +299,23 @@ const year = new Date().getFullYear()
   color: var(--color-text-secondary);
 }
 
+.theme-toggle {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
 .menu-toggle:hover {
   background: var(--color-primary-soft);
   color: var(--color-primary);
@@ -290,7 +325,7 @@ const year = new Date().getFullYear()
 .mobile-menu {
   display: none;
   border-top: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-card);
   padding: 12px 16px 16px;
 }
 
@@ -309,7 +344,7 @@ const year = new Date().getFullYear()
   align-items: center;
   justify-content: space-between;
   padding: 11px 6px;
-  border-bottom: 1px solid #f1f3f8;
+  border-bottom: 1px solid var(--color-border);
   font-size: 15px;
   color: var(--color-text);
 }
@@ -357,7 +392,7 @@ const year = new Date().getFullYear()
 /* 页脚 */
 .site-footer {
   border-top: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-card);
   padding: 22px 0;
   margin-top: auto;
 }
@@ -387,5 +422,17 @@ const year = new Date().getFullYear()
 
 .divider {
   color: var(--color-border);
+}
+
+.footer-rss {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.footer-rss:hover {
+  color: var(--color-primary);
 }
 </style>

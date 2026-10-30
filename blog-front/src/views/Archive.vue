@@ -65,7 +65,7 @@ const total = (): number => (data.value ?? []).reduce((sum, y) => sum + (y.artic
   top: 8px;
   bottom: -8px;
   width: 2px;
-  background: #e8ebf5;
+  background: var(--timeline-line);
 }
 
 .year-group:last-child::before {
@@ -118,7 +118,7 @@ const total = (): number => (data.value ?? []).reduce((sum, y) => sum + (y.artic
 }
 
 .item:hover {
-  background: #f7f8fd;
+  background: var(--color-chip);
 }
 
 .item .dot {
@@ -127,7 +127,7 @@ const total = (): number => (data.value ?? []).reduce((sum, y) => sum + (y.artic
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #cdd3e1;
+  background: var(--timeline-dot);
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
