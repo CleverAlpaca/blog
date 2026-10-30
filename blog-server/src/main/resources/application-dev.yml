@@ -12,3 +12,14 @@ spring:
 logging:
   level:
     com.example.blog.mapper: debug
+
+# 图床：指向本地 MinIO（S3 兼容）；换回本地磁盘存储把 type 改回 local 即可
+blog:
+  storage:
+    type: oss
+    oss:
+      endpoint: http://127.0.0.1:9000
+      access-key-id: minioadmin
+      access-key-secret: minioadmin
+      bucket: blog
+      host: http://127.0.0.1:9000/blog

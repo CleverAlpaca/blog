@@ -35,3 +35,11 @@ sa-token:
 
 blog:
   upload-dir: ./upload
+  storage:
+    type: local    # local 本地磁盘 / oss 阿里云 OSS（endpoint 指向 MinIO 等自建服务亦可）
+    # oss:
+    #   endpoint: oss-cn-hangzhou.aliyuncs.com
+    #   access-key-id: your-ak
+    #   access-key-secret: your-sk
+    #   bucket: your-bucket
+    #   host: https://cdn.example.com   # 可选：自定义图片访问域名（CDN）

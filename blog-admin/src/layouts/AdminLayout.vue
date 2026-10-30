@@ -94,6 +94,10 @@ const activeMenu = computed(() => {
 })
 
 const crumbs = computed<string[]>(() => {
+  // 编辑文章与写文章共用路由，按是否携带 id 区分文案
+  if (route.path === '/articles/edit') {
+    return ['文章管理', route.query.id ? '编辑文章' : '写文章']
+  }
   if (route.meta.crumbs?.length) return route.meta.crumbs
   return route.meta.title ? [route.meta.title] : ['后台管理']
 })

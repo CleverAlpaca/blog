@@ -31,7 +31,7 @@
 
       <!-- 列表 -->
       <el-table v-loading="loading" :data="list" style="width: 100%" empty-text="暂无文章">
-        <el-table-column prop="title" label="标题" min-width="220" show-overflow-tooltip>
+        <el-table-column prop="title" label="标题" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <el-tag v-if="row.isTop === 1" type="danger" size="small" effect="dark" class="top-tag">顶</el-tag>
             <span>{{ row.title }}</span>
@@ -47,7 +47,7 @@
             {{ row.categoryName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="标签" min-width="160">
+        <el-table-column label="标签" min-width="120">
           <template #default="{ row }">
             <template v-if="row.tags && row.tags.length">
               <el-tag v-for="tag in row.tags" :key="tag.id" size="small" class="tag-item" type="info">
