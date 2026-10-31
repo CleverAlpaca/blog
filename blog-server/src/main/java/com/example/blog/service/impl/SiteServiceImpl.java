@@ -15,6 +15,7 @@ import com.example.blog.service.SiteConfigService;
 import com.example.blog.service.SiteService;
 import com.example.blog.vo.AboutVO;
 import com.example.blog.vo.SiteStatsVO;
+import com.example.blog.vo.UserHomeVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -119,6 +120,23 @@ public class SiteServiceImpl implements SiteService {
         }
         xml.append("</channel>\n</rss>");
         return xml.toString();
+    }
+
+    @Override
+    public UserHomeVO userHome(Long id) {
+        User user = userMapper.selectById(id);
+        if (user == null || user.getStatus() == 0) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在或已被封禁");
+        }
+        UserHomeVO vo = new UserHomeVO();
+        vo.setId(user.getId());
+        vo.setNickname(user.getNickname());
+        vo.setAvatar(user.getAvatar());
+        vo.setIntro(user.getIntro());
+        vo.setRegDate(user.getCreateTime() == null ? ""
+                : user.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        vo.setBadge("ADMIN".equals(user.getRole()) ? "admin" : "user");
+        return vo;
     }
 
     private String escape(String s) {

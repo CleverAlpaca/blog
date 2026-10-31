@@ -1,5 +1,6 @@
 package com.example.blog.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.blog.common.BusinessException;
@@ -7,7 +8,9 @@ import com.example.blog.common.ErrorCode;
 import com.example.blog.common.PageResult;
 import com.example.blog.dto.MessagePostRequest;
 import com.example.blog.entity.Message;
+import com.example.blog.entity.User;
 import com.example.blog.mapper.MessageMapper;
+import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.MessageService;
 import com.example.blog.util.RateLimitUtil;
 import com.example.blog.vo.AdminCommentVO;
@@ -29,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private static final int RATE_LIMIT_PER_MINUTE = 5;
 
     private final MessageMapper messageMapper;
+    private final UserMapper userMapper;
     private final RateLimitUtil rateLimitUtil;
 
     @Override
@@ -55,10 +59,18 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void post(MessagePostRequest request, String ip) {
         rateLimitUtil.check("message", ip, RATE_LIMIT_PER_MINUTE);
+        // 与评论一致的社区政策：仅登录可留言，身份由账号派生
+        long userId = StpUtil.getLoginIdAsLong();
+        User user = userMapper.selectById(userId);
+        if (user == null || user.getStatus() == 0) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "账号不可用");
+        }
         Message message = new Message();
+        message.setUserId(userId);
         message.setParentId(normalizeParentId(request.getParentId()));
-        message.setNickname(request.getNickname().trim());
-        message.setEmail(orDefault(request.getEmail()));
+        message.setNickname(user.getNickname() == null || user.getNickname().isBlank()
+                ? user.getUsername() : user.getNickname());
+        message.setEmail(orDefault(user.getEmail()));
         message.setContent(request.getContent().trim());
         message.setStatus(1);
         message.setIp(ip);
@@ -120,6 +132,7 @@ public class MessageServiceImpl implements MessageService {
     private MessageVO toVO(Message m) {
         MessageVO vo = new MessageVO();
         vo.setId(m.getId());
+        vo.setUserId(m.getUserId());
         vo.setParentId(m.getParentId());
         vo.setNickname(m.getNickname());
         vo.setContent(m.getContent());

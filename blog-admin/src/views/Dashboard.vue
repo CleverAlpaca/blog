@@ -85,7 +85,8 @@ const statCards = computed(() => [
   { label: '总点赞数', value: dashboard.value?.totalLikes ?? 0, icon: 'Star', color: '#f56c6c', bg: '#fef0f0' },
   { label: '分类数量', value: dashboard.value?.categoryCount ?? 0, icon: 'FolderOpened', color: '#409eff', bg: '#ecf5ff' },
   { label: '标签数量', value: dashboard.value?.tagCount ?? 0, icon: 'PriceTag', color: '#67c23a', bg: '#f0f9eb' },
-  { label: '友链数量', value: dashboard.value?.friendLinkCount ?? 0, icon: 'Link', color: '#909399', bg: '#f4f4f5' }
+  { label: '友链数量', value: dashboard.value?.friendLinkCount ?? 0, icon: 'Link', color: '#909399', bg: '#f4f4f5' },
+  { label: '注册用户', value: dashboard.value?.userCount ?? 0, icon: 'User', color: '#67c23a', bg: '#f0f9eb' }
 ])
 
 const renderCharts = (): void => {

@@ -79,6 +79,18 @@ const router = createRouter({
           meta: { title: '站点配置' }
         },
         {
+          path: 'review',
+          name: 'review',
+          component: () => import('@/views/Review.vue'),
+          meta: { title: '投稿审核' }
+        },
+        {
+          path: 'users',
+          name: 'users',
+          component: () => import('@/views/UserManage.vue'),
+          meta: { title: '用户管理' }
+        },
+        {
           path: 'profile',
           name: 'profile',
           component: () => import('@/views/Profile.vue'),

@@ -10,6 +10,10 @@ public class ArticleDetailVO {
 
     private Long id;
 
+    private Long authorId;
+
+    private String authorName;
+
     private String title;
 
     private String summary;
@@ -49,4 +53,7 @@ public class ArticleDetailVO {
 
     /** 当前访客是否已点赞（后台编辑回显时为 null） */
     private Boolean liked;
+
+    /** 退回原因（status=4 且作者是当前登录用户时有值） */
+    private String rejectReason;
 }

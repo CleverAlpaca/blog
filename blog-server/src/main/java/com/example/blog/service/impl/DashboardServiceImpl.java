@@ -13,6 +13,7 @@ import com.example.blog.mapper.CommentMapper;
 import com.example.blog.mapper.FriendLinkMapper;
 import com.example.blog.mapper.MessageMapper;
 import com.example.blog.mapper.TagMapper;
+import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.CategoryService;
 import com.example.blog.service.CommentService;
 import com.example.blog.service.DashboardService;
@@ -35,6 +36,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final CommentMapper commentMapper;
     private final MessageMapper messageMapper;
     private final FriendLinkMapper friendLinkMapper;
+    private final UserMapper userMapper;
     private final CommentService commentService;
     private final CategoryService categoryService;
 
@@ -53,6 +55,7 @@ public class DashboardServiceImpl implements DashboardService {
                 new LambdaQueryWrapper<Message>().eq(Message::getStatus, 1)));
         vo.setFriendLinkCount(friendLinkMapper.selectCount(
                 new LambdaQueryWrapper<FriendLink>().eq(FriendLink::getStatus, 1)));
+        vo.setUserCount(userMapper.selectCount(null));
 
         List<Map<String, Object>> sums = articleMapper.selectMaps(new QueryWrapper<Article>()
                 .select("IFNULL(SUM(views),0) AS totalViews", "IFNULL(SUM(likes),0) AS totalLikes"));

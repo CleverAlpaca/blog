@@ -3,6 +3,7 @@ package com.example.blog.controller.front;
 import com.example.blog.common.PageResult;
 import com.example.blog.common.Result;
 import com.example.blog.dto.CommentPostRequest;
+import cn.dev33.satoken.stp.StpUtil;
 import com.example.blog.service.ArticleService;
 import com.example.blog.service.CommentService;
 import com.example.blog.service.LikeService;
@@ -82,6 +83,8 @@ public class ArticleController {
             @PathVariable Long id,
             @Valid @RequestBody CommentPostRequest body,
             HttpServletRequest request) {
+        // 决策点 2：仅登录可评论
+        StpUtil.checkLogin();
         commentService.post(id, body, IpUtil.getIp(request));
         return Result.ok();
     }

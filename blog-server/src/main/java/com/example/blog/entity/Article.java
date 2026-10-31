@@ -38,6 +38,9 @@ public class Article {
 
     private Integer commentCount;
 
+    /** 退回原因（status=4 时展示给作者） */
+    private String rejectReason;
+
     @TableLogic
     private Integer deleted;
 

@@ -177,6 +177,35 @@ export interface CategoryStat {
   count: number
 }
 
+/** ===== 投稿审核 ===== */
+
+/** 后台投稿审核列表项（AdminReviewVO） */
+export interface AdminReviewVO {
+  id: number
+  title: string
+  authorId: number | null
+  authorName: string
+  /** 3 待审核 / 4 已退回 */
+  status: number
+  rejectReason: string
+  /** 提交时间（= 文章 updateTime） */
+  submitTime: string
+}
+
+/** ===== 用户管理 ===== */
+
+/** 后台用户管理列表项（UserManageVO） */
+export interface UserManageVO {
+  id: number
+  username: string
+  nickname: string
+  email: string
+  role: string
+  status: number
+  createTime: string
+  articleCount: number
+}
+
 /** ===== 看板 ===== */
 
 export interface DashboardData {
@@ -187,6 +216,8 @@ export interface DashboardData {
   commentCount: number
   messageCount: number
   friendLinkCount: number
+  /** 注册用户数（含管理员） */
+  userCount: number
   totalViews: number
   totalLikes: number
   latestComments: AdminComment[]

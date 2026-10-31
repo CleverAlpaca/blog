@@ -63,6 +63,36 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '关于' }
   },
   {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/Login.vue'),
+    meta: { title: '登录' }
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/Register.vue'),
+    meta: { title: '注册' }
+  },
+  {
+    path: '/write',
+    name: 'write',
+    component: () => import('@/views/Write.vue'),
+    meta: { title: '写文章', requiresAuth: true }
+  },
+  {
+    path: '/my/articles',
+    name: 'my-articles',
+    component: () => import('@/views/MyArticles.vue'),
+    meta: { title: '我的投稿', requiresAuth: true }
+  },
+  {
+    path: '/user/:id',
+    name: 'user-home',
+    component: () => import('@/views/UserHome.vue'),
+    props: true
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/NotFound.vue')
@@ -77,6 +107,14 @@ const router = createRouter({
     if (to.hash) return { el: to.hash, behavior: 'smooth' }
     return { top: 0 }
   }
+})
+
+// 登录守卫：requiresAuth 的路由需要前台登录态
+router.beforeEach((to) => {
+  if (to.meta.requiresAuth && !localStorage.getItem('front_token')) {
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  return true
 })
 
 export default router

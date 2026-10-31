@@ -2,6 +2,7 @@ package com.example.blog.controller.front;
 
 import com.example.blog.common.Result;
 import com.example.blog.dto.MessagePostRequest;
+import cn.dev33.satoken.stp.StpUtil;
 import com.example.blog.service.MessageService;
 import com.example.blog.util.IpUtil;
 import com.example.blog.vo.MessageVO;
@@ -30,6 +31,8 @@ public class MessageController {
 
     @PostMapping
     public Result<Void> post(@Valid @RequestBody MessagePostRequest body, HttpServletRequest request) {
+        // 与评论保持一致的社区政策：仅登录可留言
+        StpUtil.checkLogin();
         messageService.post(body, IpUtil.getIp(request));
         return Result.ok();
     }

@@ -21,6 +21,9 @@ public class DashboardVO {
 
     private Long friendLinkCount;
 
+    /** 注册用户数（含管理员） */
+    private Long userCount;
+
     private Long totalViews;
 
     private Long totalLikes;

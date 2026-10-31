@@ -2,6 +2,7 @@ package com.example.blog.service;
 
 import com.example.blog.vo.AboutVO;
 import com.example.blog.vo.SiteStatsVO;
+import com.example.blog.vo.UserHomeVO;
 
 public interface SiteService {
 
@@ -10,6 +11,9 @@ public interface SiteService {
 
     /** 站点统计 */
     SiteStatsVO stats();
+
+    /** 用户公开资料（个人主页；封禁用户 404） */
+    UserHomeVO userHome(Long id);
 
     /** RSS 2.0 订阅源（最新 20 篇已发布文章） */
     String rss();

@@ -11,6 +11,9 @@ public class CommentVO {
 
     private Long id;
 
+    /** 评论者用户ID（历史游客评论为 null；可据此链接到个人主页） */
+    private Long userId;
+
     private Long parentId;
 
     private String nickname;

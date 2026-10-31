@@ -109,6 +109,10 @@ const hasNext = computed(() => Boolean(detail.value?.nextId))
             <h1 class="title">{{ detail.title }}</h1>
 
             <div class="meta">
+              <RouterLink v-if="detail.authorId" :to="`/user/${detail.authorId}`" class="meta-item category">
+                <AppIcon name="user" :size="14" />
+                {{ detail.authorName }}
+              </RouterLink>
               <span class="meta-item">
                 <AppIcon name="calendar" :size="14" />
                 {{ formatDateTime(detail.createTime) }}
@@ -196,7 +200,7 @@ const hasNext = computed(() => Boolean(detail.value?.nextId))
             :fetch-list="() => getCommentTree(articleId ?? 0)"
             :submit="submitComment"
             title="评论"
-            placeholder="发表你的看法…（昵称必填，邮箱选填）"
+            placeholder="发表你的看法…"
             empty-text="还没有评论，快来抢沙发吧"
           />
         </article>

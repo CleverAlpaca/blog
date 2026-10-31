@@ -47,6 +47,10 @@ const coverUrl = computed(() => {
 
       <div class="meta">
         <div class="meta-left">
+          <span v-if="article.authorName" class="author">
+            <AppIcon name="user" :size="13" />
+            {{ article.authorName }}
+          </span>
           <RouterLink v-if="article.categoryName" :to="`/category/${article.categoryId}`" class="category" @click.stop>
             <AppIcon name="folder" :size="13" />
             {{ article.categoryName }}
@@ -188,6 +192,14 @@ const coverUrl = computed(() => {
   gap: 8px;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+.author {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 .category {

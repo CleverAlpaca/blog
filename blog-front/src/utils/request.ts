@@ -17,6 +17,11 @@ const request = axios.create({
 
 request.interceptors.request.use((config) => {
   config.headers['X-Visitor-Id'] = getVisitorId()
+  // 登录用户携带 token（/api/front/my/**、评论、留言等需要）
+  const token = localStorage.getItem('front_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
   return config
 })
 
@@ -42,6 +47,11 @@ request.interceptors.response.use(
       if (body.code === 200) {
         return body.data as never
       }
+      // 登录态失效（token 过期/被封禁）：清空本地会话
+      if (body.code === 401) {
+        localStorage.removeItem('front_token')
+        localStorage.removeItem('front_user')
+      }
       const message = body.message || '请求失败'
       showToast(message)
       return Promise.reject(new Error(message))
@@ -64,6 +74,16 @@ export async function get<T>(url: string, params?: Record<string, unknown>, conf
 /** POST 请求（响应拦截器已解包 data） */
 export async function post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
   return request.post(url, data, config) as Promise<T>
+}
+
+/** PUT 请求（响应拦截器已解包 data） */
+export async function put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  return request.put(url, data, config) as Promise<T>
+}
+
+/** DELETE 请求（响应拦截器已解包 data） */
+export async function del<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  return request.delete(url, config) as Promise<T>
 }
 
 export default request

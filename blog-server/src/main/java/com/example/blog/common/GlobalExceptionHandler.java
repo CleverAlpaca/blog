@@ -1,6 +1,7 @@
 package com.example.blog.common;
 
 import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotRoleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,6 +24,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotLoginException.class)
     public Result<Void> handleNotLogin(NotLoginException e) {
         return Result.fail(ErrorCode.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(NotRoleException.class)
+    public Result<Void> handleNotRole(NotRoleException e) {
+        return Result.fail(ErrorCode.FORBIDDEN.getCode(), "无管理员权限");
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})

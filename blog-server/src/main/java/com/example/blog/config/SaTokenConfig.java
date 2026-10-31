@@ -22,8 +22,20 @@ public class SaTokenConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
+        // 管理端：登录 + ADMIN 角色双重校验（注册用户的 token 会被拒绝）
+        registry.addInterceptor(new SaInterceptor(handle -> {
+                    StpUtil.checkLogin();
+                    StpUtil.checkRole("ADMIN");
+                }))
                 .addPathPatterns("/api/admin/**")
                 .excludePathPatterns("/api/admin/login");
+
+        // 前台登录态端点：我的投稿 / 资料 / 改密 / 登出
+        registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
+                .addPathPatterns(
+                        "/api/front/my/**",
+                        "/api/front/auth/profile",
+                        "/api/front/auth/password",
+                        "/api/front/auth/logout");
     }
 }

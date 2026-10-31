@@ -84,6 +84,8 @@ const menus = [
   { path: '/messages', title: '留言管理', icon: 'ChatLineSquare' },
   { path: '/friend-links', title: '友链管理', icon: 'Link' },
   { path: '/site-config', title: '站点配置', icon: 'Setting' },
+  { path: '/review', title: '投稿审核', icon: 'ChatLineSquare' },
+  { path: '/users', title: '用户管理', icon: 'UserFilled' },
   { path: '/profile', title: '个人资料', icon: 'User' }
 ]
 

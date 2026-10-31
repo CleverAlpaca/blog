@@ -3,10 +3,17 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSiteStore } from '@/stores/site'
 import { useTheme } from '@/composables/useTheme'
+import { useUserStore } from '@/stores/user'
 import AppIcon from '@/components/AppIcon.vue'
 import AppToast from '@/components/AppToast.vue'
 
 const { theme, toggleTheme } = useTheme()
+const userStore = useUserStore()
+
+async function handleLogout(): Promise<void> {
+  await userStore.logout()
+  router.push('/')
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -105,6 +112,17 @@ const year = new Date().getFullYear()
         <AppIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="17" />
       </button>
 
+      <!-- 登录态：写作入口 + 用户链接；游客：登录/注册 -->
+      <template v-if="userStore.isLoggedIn">
+        <RouterLink to="/write" class="nav-link">写文章</RouterLink>
+        <RouterLink to="/my/articles" class="nav-link">我的投稿</RouterLink>
+        <button type="button" class="nav-link" @click="handleLogout">退出</button>
+      </template>
+      <template v-else>
+        <RouterLink to="/login" class="nav-link" :class="{ active: route.path === '/login' }">登录</RouterLink>
+        <RouterLink to="/register" class="nav-link register-link">注册</RouterLink>
+      </template>
+
       <button class="menu-toggle" type="button" :aria-expanded="menuOpen" aria-label="打开菜单" @click="menuOpen = !menuOpen">
         <AppIcon :name="menuOpen ? 'x' : 'menu'" :size="20" />
       </button>
@@ -128,6 +146,16 @@ const year = new Date().getFullYear()
             {{ item.label }}
             <AppIcon name="chevron-right" :size="15" />
           </RouterLink>
+          <template v-if="userStore.isLoggedIn">
+            <RouterLink class="mobile-link" to="/write">写文章</RouterLink>
+            <RouterLink class="mobile-link" to="/my/articles">我的投稿</RouterLink>
+            <RouterLink class="mobile-link" :to="`/user/${userStore.user?.id}`">个人主页</RouterLink>
+            <button type="button" class="mobile-link logout" @click="handleLogout">退出登录</button>
+          </template>
+          <template v-else>
+            <RouterLink class="mobile-link" :to="{ path: '/login', query: { redirect: route.fullPath } }">登录</RouterLink>
+            <RouterLink class="mobile-link" to="/register">注册</RouterLink>
+          </template>
         </nav>
       </div>
     </Transition>
@@ -353,6 +381,28 @@ const year = new Date().getFullYear()
 
 .mobile-link:last-child {
   border-bottom: none;
+}
+
+.mobile-link.logout {
+  color: var(--color-danger);
+  text-align: left;
+  background: none;
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.register-link {
+  color: #fff;
+  background: var(--color-primary);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14.5px;
+}
+
+.register-link:hover {
+  background: var(--color-primary-hover);
+  color: #fff;
 }
 
 .mobile-link.active {

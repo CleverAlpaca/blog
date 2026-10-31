@@ -24,7 +24,10 @@ function initial(node: CommentNode): string {
   <div class="comment-item" :class="{ nested }">
     <div class="head">
       <div class="mini-avatar" :style="avatarStyle(node)">{{ initial(node) }}</div>
-      <span class="nickname">{{ node.nickname }}</span>
+      <RouterLink v-if="node.userId" :to="`/user/${node.userId}`" class="nickname linked">
+        {{ node.nickname }}
+      </RouterLink>
+      <span v-else class="nickname">{{ node.nickname }}</span>
       <span class="time">{{ formatDateTime(node.createTime) }}</span>
       <button type="button" class="reply-btn" @click="emit('reply', node)">回复</button>
     </div>
@@ -68,6 +71,10 @@ function initial(node: CommentNode): string {
 .nickname {
   font-size: 14px;
   font-weight: 600;
+}
+
+a.nickname:hover {
+  color: var(--color-primary);
 }
 
 .time {

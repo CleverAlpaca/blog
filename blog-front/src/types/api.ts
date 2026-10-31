@@ -32,6 +32,8 @@ export interface FriendLink {
 /** 文章卡片（ArticleCardVO，列表/热门共用） */
 export interface ArticleCard {
   id: number
+  authorId?: number | null
+  authorName?: string | null
   title: string
   summary?: string | null
   coverImage?: string | null
@@ -55,6 +57,8 @@ export interface ArticleDetail extends ArticleCard {
   nextId?: number | null
   nextTitle?: string | null
   liked?: boolean | null
+  /** 退回原因（作者查看被退回投稿时有值） */
+  rejectReason?: string | null
 }
 
 /** 点赞开关返回（LikeVO） */
@@ -79,6 +83,8 @@ export interface ArchiveYear {
 /** 两级评论/留言节点（CommentVO / MessageVO 结构一致） */
 export interface CommentNode {
   id: number
+  /** 评论者用户ID（历史游客评论为 null；可链接到个人主页） */
+  userId?: number | null
   parentId?: number | null
   nickname: string
   content: string
@@ -86,11 +92,9 @@ export interface CommentNode {
   replies?: CommentNode[] | null
 }
 
-/** 发表评论/留言请求体（CommentPostRequest / MessagePostRequest） */
+/** 发表评论/留言请求体（仅登录用户，昵称由账号派生） */
 export interface CommentPost {
   parentId?: number
-  nickname: string
-  email?: string
   content: string
 }
 
@@ -118,6 +122,58 @@ export interface PageResult<T> {
   total: number
   pageNum: number
   pageSize: number
+}
+
+/** ===== 多用户社区 ===== */
+
+/** 用户信息（UserVO） */
+export interface UserVO {
+  id: number
+  username: string
+  nickname: string
+  avatar?: string | null
+  intro?: string | null
+  email?: string | null
+  /** ADMIN / USER */
+  role: string
+}
+
+/** 前台登录/注册结果（FrontLoginVO） */
+export interface FrontLogin {
+  token: string
+  role: string
+  user: UserVO
+}
+
+/** 投稿/存草稿请求（MyArticleSaveRequest） */
+export interface MyArticleSave {
+  title: string
+  summary?: string
+  coverImage?: string
+  categoryId?: number
+  tagIds: number[]
+  content: string
+  /** draft 存草稿 / submit 提交审核 */
+  action: 'draft' | 'submit'
+}
+
+/** 我的投稿状态数量（statsMine） */
+export interface MyArticleStats {
+  draft: number
+  pending: number
+  returned: number
+  published: number
+}
+
+/** 个人主页资料（UserHomeVO） */
+export interface UserHome {
+  id: number
+  nickname: string
+  avatar?: string | null
+  intro?: string | null
+  regDate: string
+  /** admin=博主 user=社区作者 */
+  badge: string
 }
 
 /** 文章列表查询参数 */

@@ -18,7 +18,7 @@ async function submit(body: CommentPost): Promise<void> {
   <div class="message-page">
     <header class="page-header">
       <h1><AppIcon name="message-circle" :size="20" /> 留言板</h1>
-      <p class="page-desc">有什么想对博主说的，留下一句话吧（昵称必填，邮箱选填）</p>
+      <p class="page-desc">有什么想对博主说的，登录后留下一句话吧</p>
     </header>
 
     <CommentSection

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import type { CommentPost } from '@/types/api'
 import AppIcon from './AppIcon.vue'
 
@@ -11,8 +11,10 @@ const props = withDefaults(
     compact?: boolean
     submitting?: boolean
     placeholder?: string
+    /** 发表者昵称（登录态展示，不可改） */
+    nickname?: string
   }>(),
-  { replyTo: '', compact: false, submitting: false, placeholder: '' }
+  { replyTo: '', compact: false, submitting: false, placeholder: '', nickname: '' }
 )
 
 const emit = defineEmits<{
@@ -20,46 +22,18 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
-const PROFILE_KEY = 'commenter_profile'
-
-const form = reactive<{ nickname: string; email: string; content: string }>({ nickname: '', email: '', content: '' })
-const validated = ref(false)
-
-onMounted(() => {
-  try {
-    const raw = localStorage.getItem(PROFILE_KEY)
-    if (raw) {
-      const profile = JSON.parse(raw) as { nickname?: string; email?: string }
-      form.nickname = profile.nickname || ''
-      form.email = profile.email || ''
-    }
-  } catch {
-    /* 忽略损坏的历史数据 */
-  }
-})
+const form = reactive({ content: '' })
 
 function handleSubmit(): void {
-  validated.value = true
-  const nickname = form.nickname.trim()
   const content = form.content.trim()
-  if (!nickname) return
   if (!content) return
-  const body: CommentPost = { nickname, content }
-  const email = form.email.trim()
-  if (email) body.email = email
-  emit('submit', body)
+  emit('submit', { content })
 }
 
-/** 供父组件在提交成功后调用：清空内容并记忆身份 */
+/** 供父组件在提交成功后调用：清空内容 */
 defineExpose({
   reset(): void {
-    validated.value = false
     form.content = ''
-    try {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({ nickname: form.nickname.trim(), email: form.email.trim() }))
-    } catch {
-      /* localStorage 不可用时忽略 */
-    }
   }
 })
 </script>
@@ -75,21 +49,19 @@ defineExpose({
     </div>
 
     <form class="form-body" @submit.prevent="handleSubmit">
-      <div class="row">
-        <input v-model="form.nickname" class="form-input" type="text" maxlength="32" placeholder="昵称（必填）" />
-        <input v-model="form.email" class="form-input" type="email" maxlength="128" placeholder="邮箱（选填，不会公开）" />
+      <div v-if="props.nickname" class="identity">
+        <AppIcon name="user" :size="13" />
+        以 <strong>{{ props.nickname }}</strong> 的身份发表
       </div>
       <textarea
         v-model="form.content"
         class="form-textarea"
-        :class="{ invalid: validated && !form.content.trim() }"
         maxlength="1000"
         :placeholder="props.placeholder || '说点什么吧…（支持 1000 字以内）'"
       ></textarea>
       <div class="actions">
-        <span v-if="validated && !form.nickname.trim()" class="field-error">请填写昵称</span>
         <span class="count">{{ form.content.length }}/1000</span>
-        <button class="btn btn-primary" type="submit" :disabled="props.submitting">
+        <button class="btn btn-primary" type="submit" :disabled="props.submitting || !form.content.trim()">
           <AppIcon name="send" :size="14" />
           {{ props.submitting ? '发布中…' : '发表' }}
         </button>
@@ -134,37 +106,35 @@ defineExpose({
   opacity: 1;
 }
 
+.identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--color-text-tertiary);
+}
+
+.identity strong {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
 .form-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-@media (max-width: 560px) {
-  .row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.form-textarea.invalid {
-  border-color: var(--color-danger);
+.form-textarea {
+  resize: vertical;
+  min-height: 88px;
+  line-height: 1.6;
 }
 
 .actions {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.field-error {
-  color: var(--color-danger);
-  font-size: 12.5px;
 }
 
 .count {

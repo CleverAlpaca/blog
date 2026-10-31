@@ -11,6 +11,10 @@ public class ArticleCardVO {
 
     private Long id;
 
+    private Long authorId;
+
+    private String authorName;
+
     private String title;
 
     private String summary;
@@ -35,4 +39,6 @@ public class ArticleCardVO {
     private Integer commentCount;
 
     private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
 }

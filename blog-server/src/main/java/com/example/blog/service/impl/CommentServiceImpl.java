@@ -1,5 +1,6 @@
 package com.example.blog.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,8 +10,10 @@ import com.example.blog.common.PageResult;
 import com.example.blog.dto.CommentPostRequest;
 import com.example.blog.entity.Article;
 import com.example.blog.entity.Comment;
+import com.example.blog.entity.User;
 import com.example.blog.mapper.ArticleMapper;
 import com.example.blog.mapper.CommentMapper;
+import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.CommentService;
 import com.example.blog.util.RateLimitUtil;
 import com.example.blog.vo.AdminCommentVO;
@@ -37,6 +40,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
     private final ArticleMapper articleMapper;
+    private final UserMapper userMapper;
     private final RateLimitUtil rateLimitUtil;
 
     @Override
@@ -64,15 +68,23 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void post(Long articleId, CommentPostRequest request, String ip) {
         rateLimitUtil.check("comment", ip, RATE_LIMIT_PER_MINUTE);
+        // 决策点 2：仅登录可评论，身份由账号派生
+        long userId = StpUtil.getLoginIdAsLong();
+        User user = userMapper.selectById(userId);
+        if (user == null || user.getStatus() == 0) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "账号不可用");
+        }
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "文章不存在");
         }
         Comment comment = new Comment();
         comment.setArticleId(articleId);
+        comment.setUserId(userId);
         comment.setParentId(normalizeParentId(articleId, request.getParentId()));
-        comment.setNickname(request.getNickname().trim());
-        comment.setEmail(orDefault(request.getEmail()));
+        comment.setNickname(user.getNickname() == null || user.getNickname().isBlank()
+                ? user.getUsername() : user.getNickname());
+        comment.setEmail(orDefault(user.getEmail()));
         comment.setContent(request.getContent().trim());
         comment.setStatus(1);
         comment.setIp(ip);
@@ -178,6 +190,7 @@ public class CommentServiceImpl implements CommentService {
     private CommentVO toVO(Comment c) {
         CommentVO vo = new CommentVO();
         vo.setId(c.getId());
+        vo.setUserId(c.getUserId());
         vo.setParentId(c.getParentId());
         vo.setNickname(c.getNickname());
         vo.setContent(c.getContent());

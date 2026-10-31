@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from 'vue'
+import { useRoute } from 'vue-router'
 import type { CommentNode, CommentPost } from '@/types/api'
 import { useRequest } from '@/composables/useRequest'
-import { showError, showSuccess } from '@/utils/toast'
+import { useUserStore } from '@/stores/user'
+import { showSuccess } from '@/utils/toast'
+import AppIcon from './AppIcon.vue'
 import LoadState from './LoadState.vue'
 import CommentForm from './CommentForm.vue'
 import CommentItem from './CommentItem.vue'
 
 /**
  * 评论区通用组件（文章评论 / 留言板共用）：
- * 两级树展示 + 顶级发表表单 + 楼内内联回复表单。
+ * 仅登录可发表（决策点 2）；两级树展示 + 顶级发表表单 + 楼内内联回复表单。
  */
 const props = withDefaults(
   defineProps<{
@@ -24,6 +27,8 @@ const props = withDefaults(
   { title: '评论', placeholder: '', emptyText: '还没有评论，快来抢沙发吧', showCount: true }
 )
 
+const route = useRoute()
+const userStore = useUserStore()
 const { data: comments, loading, error, run } = useRequest<CommentNode[]>(props.fetchList)
 
 const submitting = ref(false)
@@ -75,10 +80,6 @@ async function handleSubmit(body: CommentPost, parentId?: number): Promise<void>
 }
 
 function handleTopSubmit(body: CommentPost): void {
-  if (!body.nickname.trim()) {
-    showError('请填写昵称')
-    return
-  }
   void handleSubmit(body)
 }
 
@@ -86,10 +87,6 @@ function handleInlineSubmit(body: CommentPost): void {
   const parentId = replyTarget.value?.id
   if (!parentId) {
     cancelReply()
-    return
-  }
-  if (!body.nickname.trim()) {
-    showError('请填写昵称')
     return
   }
   void handleSubmit(body, parentId)
@@ -103,13 +100,21 @@ function handleInlineSubmit(body: CommentPost): void {
       <span v-if="props.showCount && totalCount" class="count-badge">{{ totalCount }}</span>
     </h3>
 
-    <!-- 顶级发表表单 -->
+    <!-- 顶级发表表单：仅登录（游客展示登录引导） -->
     <CommentForm
+      v-if="userStore.isLoggedIn"
       ref="mainForm"
       :submitting="submitting"
+      :nickname="userStore.user?.nickname || ''"
       :placeholder="props.placeholder"
       @submit="handleTopSubmit"
     />
+    <div v-else class="login-prompt">
+      <AppIcon name="user" :size="16" />
+      <span>登录后即可{{ props.title }}，与博主和其他读者交流</span>
+      <RouterLink class="btn btn-primary" :to="{ path: '/login', query: { redirect: route.fullPath } }">登录</RouterLink>
+      <RouterLink class="btn btn-ghost" to="/register">注册</RouterLink>
+    </div>
 
     <p class="list-total">全部{{ props.title }}（{{ totalCount }}）</p>
 
@@ -125,17 +130,24 @@ function handleInlineSubmit(body: CommentPost): void {
         <template v-for="node in comments ?? []" :key="node.id">
           <CommentItem :node="node" @reply="startReply" />
 
-          <!-- 楼内回复：内联展开表单 -->
+          <!-- 楼内回复：内联展开表单（仅登录） -->
           <div v-if="replyTarget && replyTarget.id === node.id" class="inline-form">
             <CommentForm
+              v-if="userStore.isLoggedIn"
               ref="inlineForm"
               compact
               :reply-to="replyTarget.nickname"
+              :nickname="userStore.user?.nickname || ''"
               :submitting="submitting"
               placeholder="写下你的回复…"
               @submit="handleInlineSubmit"
               @cancel="cancelReply"
             />
+            <div v-else class="login-prompt">
+              <AppIcon name="user" :size="16" />
+              <span>登录后即可回复</span>
+              <RouterLink class="btn btn-primary" :to="{ path: '/login', query: { redirect: route.fullPath } }">登录</RouterLink>
+            </div>
           </div>
         </template>
       </div>
@@ -171,6 +183,23 @@ function handleInlineSubmit(body: CommentPost): void {
 
 .inline-form {
   margin: 4px 0 14px 40px;
+}
+
+.login-prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-small);
+  color: var(--color-text-secondary);
+  font-size: 13.5px;
+}
+
+.login-prompt .btn {
+  padding: 5px 14px;
+  font-size: 13px;
 }
 
 @media (max-width: 560px) {

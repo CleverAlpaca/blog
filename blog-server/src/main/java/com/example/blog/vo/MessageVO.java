@@ -10,6 +10,9 @@ public class MessageVO {
 
     private Long id;
 
+    /** 留言者用户ID（历史游客留言为 null） */
+    private Long userId;
+
     private Long parentId;
 
     private String nickname;
