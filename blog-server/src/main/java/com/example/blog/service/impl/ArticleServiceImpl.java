@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -296,16 +297,23 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<AdminReviewVO> pageReview(long pageNum, long pageSize, Integer status, String keyword) {
+        // status：空=全部（待审核+已退回+已审核通过的投稿）；1=已审核；3=待审核；4=已退回
         LambdaQueryWrapper<Article> w = new LambdaQueryWrapper<Article>()
-                .like(StringUtils.hasText(keyword), Article::getTitle, keyword)
-                .orderByDesc(Article::getUpdateTime).orderByDesc(Article::getId);
-        if (status != null) {
-            if (status != 3 && status != 4) {
-                throw new BusinessException(400, "status 仅支持 3（待审核）或 4（已退回）");
-            }
+                .like(StringUtils.hasText(keyword), Article::getTitle, keyword);
+        if (status == null) {
+            w.and(q -> q.in(Article::getStatus, List.of(3, 4)).or().isNotNull(Article::getReviewTime));
+        } else if (status == 1) {
+            // 已审核：仅投稿审核流程通过的文章（review_time 非空），不混入后台直接发布的文章
+            w.isNotNull(Article::getReviewTime);
+        } else if (status == 3 || status == 4) {
             w.eq(Article::getStatus, status);
         } else {
-            w.in(Article::getStatus, List.of(3, 4));
+            throw new BusinessException(400, "status 仅支持 1（已审核）、3（待审核）或 4（已退回）");
+        }
+        if (status != null && status == 1) {
+            w.orderByDesc(Article::getReviewTime).orderByDesc(Article::getId);
+        } else {
+            w.orderByDesc(Article::getUpdateTime).orderByDesc(Article::getId);
         }
         Page<Article> page = articleMapper.selectPage(new Page<>(pageNum, pageSize), w);
         Set<Long> authorIds = page.getRecords().stream()
@@ -322,6 +330,7 @@ public class ArticleServiceImpl implements ArticleService {
             vo.setStatus(a.getStatus());
             vo.setRejectReason(a.getRejectReason());
             vo.setSubmitTime(a.getUpdateTime());
+            vo.setReviewTime(a.getReviewTime());
             return vo;
         }).toList();
         return new PageResult<>(vos, page.getTotal(), page.getCurrent(), page.getSize());
@@ -333,6 +342,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleMapper.update(null, new UpdateWrapper<Article>()
                 .eq("id", id)
                 .set("status", 1)
+                .set("review_time", LocalDateTime.now())
                 .set("reject_reason", ""));
     }
 

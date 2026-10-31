@@ -41,6 +41,9 @@ public class Article {
     /** 退回原因（status=4 时展示给作者） */
     private String rejectReason;
 
+    /** 投稿审核通过时间（仅投稿审核流程通过时写入，NULL 表示非审核发布的文章） */
+    private LocalDateTime reviewTime;
+
     @TableLogic
     private Integer deleted;
 

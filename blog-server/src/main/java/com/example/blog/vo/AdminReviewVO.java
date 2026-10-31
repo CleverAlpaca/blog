@@ -16,10 +16,13 @@ public class AdminReviewVO {
 
     private String authorName;
 
-    /** 3 待审核 / 4 已退回 */
+    /** 1 已审核通过 / 2 已下架（曾通过审核）/ 3 待审核 / 4 已退回 */
     private Integer status;
 
     private String rejectReason;
 
     private LocalDateTime submitTime;
+
+    /** 审核通过时间（仅通过审核的投稿有值） */
+    private LocalDateTime reviewTime;
 }

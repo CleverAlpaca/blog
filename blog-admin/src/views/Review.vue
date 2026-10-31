@@ -5,6 +5,7 @@
         <div class="toolbar">
           <el-radio-group v-model="statusFilter" @change="handleFilter">
             <el-radio-button :value="undefined">全部</el-radio-button>
+            <el-radio-button :value="1">已审核</el-radio-button>
             <el-radio-button :value="3">待审核</el-radio-button>
             <el-radio-button :value="4">已退回</el-radio-button>
           </el-radio-group>
@@ -23,17 +24,17 @@
         </div>
       </template>
 
-      <el-table v-loading="loading" :data="list" style="width: 100%" empty-text="暂无待审核投稿">
+      <el-table v-loading="loading" :data="list" style="width: 100%" empty-text="暂无投稿记录">
         <el-table-column prop="title" label="标题" min-width="240" show-overflow-tooltip />
         <el-table-column prop="authorName" label="作者" width="140" show-overflow-tooltip />
         <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.status === 3 ? 'warning' : 'info'" size="small">
-              {{ row.status === 3 ? '待审核' : '已退回' }}
+            <el-tag :type="statusTag(row).type" size="small">
+              {{ statusTag(row).text }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="退回原因" min-width="180" show-overflow-tooltip>
+        <el-table-column label="退回原因" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             {{ row.rejectReason || '-' }}
           </template>
@@ -43,13 +44,18 @@
             {{ formatDateTime(row.submitTime) }}
           </template>
         </el-table-column>
+        <el-table-column label="审核时间" width="170">
+          <template #default="{ row }">
+            {{ row.reviewTime ? formatDateTime(row.reviewTime) : '-' }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <template v-if="row.status === 3">
               <el-button link type="primary" @click="handleApprove(row)">通过</el-button>
               <el-button link type="warning" @click="openReject(row)">退回</el-button>
             </template>
-            <span v-else class="returned-tip">已退回</span>
+            <span v-else class="muted-tip">-</span>
           </template>
         </el-table-column>
       </el-table>
@@ -103,6 +109,14 @@ const keyword = ref('')
 const rejectVisible = ref(false)
 const rejectReason = ref('')
 const rejectTarget = ref<AdminReviewVO | null>(null)
+
+/** 状态标签：1 已审核（success）/ 3 待审核（warning）/ 4 已退回（info）/ 其他=已下架（曾通过后下架） */
+function statusTag(row: AdminReviewVO): { type: 'success' | 'warning' | 'info'; text: string } {
+  if (row.status === 1) return { type: 'success', text: '已审核' }
+  if (row.status === 3) return { type: 'warning', text: '待审核' }
+  if (row.status === 4) return { type: 'info', text: '已退回' }
+  return { type: 'info', text: '已下架' }
+}
 
 async function fetchList(): Promise<void> {
   loading.value = true
@@ -192,7 +206,7 @@ onMounted(fetchList)
   justify-content: flex-end;
 }
 
-.returned-tip {
+.muted-tip {
   font-size: 12.5px;
   color: #909399;
 }

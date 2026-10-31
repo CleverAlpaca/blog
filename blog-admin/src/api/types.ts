@@ -185,11 +185,13 @@ export interface AdminReviewVO {
   title: string
   authorId: number | null
   authorName: string
-  /** 3 待审核 / 4 已退回 */
+  /** 1 已审核通过 / 2 已下架（曾通过审核）/ 3 待审核 / 4 已退回 */
   status: number
   rejectReason: string
   /** 提交时间（= 文章 updateTime） */
   submitTime: string
+  /** 审核通过时间（仅通过审核的投稿有值） */
+  reviewTime: string | null
 }
 
 /** ===== 用户管理 ===== */

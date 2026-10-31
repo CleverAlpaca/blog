@@ -51,6 +51,7 @@ CREATE TABLE `article` (
   `likes`         BIGINT   NOT NULL DEFAULT 0      COMMENT '点赞数（冗余计数，明细见 like_record）',
   `comment_count` INT      NOT NULL DEFAULT 0      COMMENT '评论数（冗余计数，列表页免统计查询）',
   `reject_reason` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '退回原因（status=4 时展示给作者）',
+  `review_time`   DATETIME NULL                     COMMENT '投稿审核通过时间（仅投稿审核通过时写入，NULL 表示非审核发布）',
   `deleted`       TINYINT  NOT NULL DEFAULT 0      COMMENT '逻辑删除：0 未删 / 1 已删',
   `create_time`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间（归档时间轴取此字段）',
   `update_time`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
