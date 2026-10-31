@@ -3,12 +3,15 @@ import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Tag } from '@/types/api'
 import { getTagList } from '@/api/tag'
+import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import ArticleList from '@/components/ArticleList.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
 usePageTitle(() => `标签：${tag.value?.name || ''}`)
+useMeta({ description: () => (tag.value ? `「${tag.value.name}」标签下的全部博客文章` : undefined) })
 
 const tagId = computed(() => Number(route.params.id))
 const query = computed(() => (Number.isInteger(tagId.value) ? { tagId: tagId.value } : {}))

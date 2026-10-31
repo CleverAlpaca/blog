@@ -36,4 +36,20 @@ public class SiteController {
                 .contentType(MediaType.parseMediaType("application/rss+xml;charset=UTF-8"))
                 .body(siteService.rss());
     }
+
+    /** SEO 站点地图（生产由 Nginx 在根路径 /sitemap.xml 转发） */
+    @GetMapping("/sitemap.xml")
+    public ResponseEntity<String> sitemap() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/xml;charset=UTF-8"))
+                .body(siteService.sitemap());
+    }
+
+    /** 爬虫规则（生产由 Nginx 在根路径 /robots.txt 转发） */
+    @GetMapping("/robots.txt")
+    public ResponseEntity<String> robots() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/plain;charset=UTF-8"))
+                .body(siteService.robots());
+    }
 }

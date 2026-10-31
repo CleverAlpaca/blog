@@ -3,11 +3,13 @@ import type { ArchiveYear } from '@/types/api'
 import { getArchives } from '@/api/article'
 import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import { formatShortDate } from '@/utils/format'
 import LoadState from '@/components/LoadState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 usePageTitle('归档')
+useMeta({ description: '文章归档时间轴，按年份浏览全部博客文章' })
 const { data, loading, error, run } = useRequest<ArchiveYear[]>(getArchives)
 
 const total = (): number => (data.value ?? []).reduce((sum, y) => sum + (y.articles?.length ?? 0), 0)

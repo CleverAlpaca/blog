@@ -4,11 +4,13 @@ import { useRoute } from 'vue-router'
 import ArticleList from '@/components/ArticleList.vue'
 import SiteSidebar from '@/components/SiteSidebar.vue'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import { useVisitorId } from '@/composables/useVisitorId'
 
 const route = useRoute()
 
 usePageTitle()
+useMeta({ description: '记录技术、设计与生活的个人博客——前后端分离架构实践、学习笔记与生活随笔' })
 // 初始化访客标识（后续请求由 axios 拦截器统一携带）
 useVisitorId()
 

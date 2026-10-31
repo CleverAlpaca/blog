@@ -7,6 +7,7 @@ import { getArticleDetail, toggleLike } from '@/api/article'
 import { getCommentTree, postComment } from '@/api/comment'
 import type { CommentPost } from '@/types/api'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import { useTheme } from '@/composables/useTheme'
 import { formatCount, formatDateTime } from '@/utils/format'
 import { buildToc, mdHeadingId, sanitizeHtml } from '@/utils/markdown'
@@ -19,6 +20,8 @@ import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
 const { theme } = useTheme()
+// 摘要作为 SEO description（文章加载后自动更新）
+useMeta({ description: () => detail.value?.summary || undefined })
 usePageTitle(() => detail.value?.title || '文章详情')
 
 const articleId = computed(() => {

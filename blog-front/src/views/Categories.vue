@@ -3,10 +3,12 @@ import type { Category } from '@/types/api'
 import { getCategoryList } from '@/api/category'
 import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import LoadState from '@/components/LoadState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 usePageTitle('分类')
+useMeta({ description: '按分类浏览博客文章' })
 const { data, loading, error, run } = useRequest<Category[]>(getCategoryList)
 </script>
 

@@ -123,4 +123,45 @@ public class SiteServiceImpl implements SiteService {
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
     }
+
+    @Override
+    public String sitemap() {
+        List<Article> articles = articleMapper.selectList(new LambdaQueryWrapper<Article>()
+                .eq(Article::getStatus, 1)
+                .orderByDesc(Article::getCreateTime)
+                .select(Article::getId, Article::getUpdateTime));
+
+        DateTimeFormatter day = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String base = trimTrailingSlash(siteUrl);
+        StringBuilder xml = new StringBuilder(1024);
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
+        for (String path : new String[] { "/", "/archive", "/categories", "/tags", "/message", "/friends", "/about" }) {
+            xml.append("<url><loc>").append(escape(base + path)).append("</loc></url>\n");
+        }
+        for (Article a : articles) {
+            xml.append("<url><loc>").append(escape(base + "/article/" + a.getId())).append("</loc>");
+            if (a.getUpdateTime() != null) {
+                xml.append("<lastmod>").append(day.format(a.getUpdateTime())).append("</lastmod>");
+            }
+            xml.append("</url>\n");
+        }
+        xml.append("</urlset>");
+        return xml.toString();
+    }
+
+    @Override
+    public String robots() {
+        String base = trimTrailingSlash(siteUrl);
+        return "User-agent: *\n"
+                + "Allow: /\n"
+                + "Disallow: /admin\n"
+                + "Disallow: /api\n"
+                + "\n"
+                + "Sitemap: " + base + "/api/front/sitemap.xml\n";
+    }
+
+    private String trimTrailingSlash(String s) {
+        return s.endsWith("/") ? s.substring(0, s.length() - 1) : s;
+    }
 }

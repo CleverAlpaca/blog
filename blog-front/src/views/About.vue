@@ -3,6 +3,7 @@ import type { About } from '@/types/api'
 import { getAbout } from '@/api/site'
 import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import { mdHeadingId, sanitizeHtml } from '@/utils/markdown'
 import LoadState from '@/components/LoadState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -12,6 +13,7 @@ import { useTheme } from '@/composables/useTheme'
 const { theme } = useTheme()
 
 usePageTitle('关于')
+useMeta({ description: '关于博主与本博客的介绍' })
 const { data, loading, error, run } = useRequest<About>(getAbout)
 
 function avatarUrl(avatar?: string | null): string {

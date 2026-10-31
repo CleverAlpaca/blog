@@ -20,6 +20,15 @@ export default defineConfig({
       '/upload': {
         target: 'http://localhost:8080',
         changeOrigin: true
+      },
+      // SEO 文件由后端动态生成（生产由 Nginx 在根路径转发）
+      '/robots.txt': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/sitemap.xml': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
       }
     }
   }

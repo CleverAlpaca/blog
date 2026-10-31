@@ -4,7 +4,12 @@
   padding: 0 !important;
 }
 
-/* 暗色下 md-editor 自带的纯黑预览底与卡片底色不齐，改为透明融入卡片 */
+/* 暗色下 md-editor 容器自带纯黑底（--md-bk-color 声明在 .md-editor-dark 上），
+   用更高优先级选择器对齐卡片底色，预览区透明融入 */
+[data-theme='dark'] .md-editor-dark {
+  --md-bk-color: var(--color-card);
+}
+
 [data-theme='dark'] .md-editor-preview {
   background: transparent;
 }

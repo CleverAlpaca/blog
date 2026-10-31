@@ -3,12 +3,15 @@ import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Category } from '@/types/api'
 import { getCategoryList } from '@/api/category'
+import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import ArticleList from '@/components/ArticleList.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
 usePageTitle(() => `分类：${category.value?.name || ''}`)
+useMeta({ description: () => (category.value ? `「${category.value.name}」分类下的全部博客文章` : undefined) })
 
 const categoryId = computed(() => Number(route.params.id))
 const query = computed(() => (Number.isInteger(categoryId.value) ? { categoryId: categoryId.value } : {}))

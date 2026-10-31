@@ -3,10 +3,12 @@ import type { FriendLink } from '@/types/api'
 import { getFriendLinkList } from '@/api/friendLink'
 import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import LoadState from '@/components/LoadState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 usePageTitle('友链')
+useMeta({ description: '友情链接——值得一看的博客站点推荐' })
 const { data, loading, error, run } = useRequest<FriendLink[]>(getFriendLinkList)
 
 function initial(name: string): string {

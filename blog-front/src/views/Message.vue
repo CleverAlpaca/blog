@@ -2,10 +2,12 @@
 import type { CommentNode, CommentPost } from '@/types/api'
 import { getMessageTree, postMessage } from '@/api/message'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import CommentSection from '@/components/CommentSection.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 usePageTitle('留言板')
+useMeta({ description: '留言板——留下你的想法与建议' })
 
 async function submit(body: CommentPost): Promise<void> {
   await postMessage(body)

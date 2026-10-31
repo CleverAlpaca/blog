@@ -3,10 +3,12 @@ import type { Tag } from '@/types/api'
 import { getTagList } from '@/api/tag'
 import { useRequest } from '@/composables/useRequest'
 import { usePageTitle } from '@/composables/usePageTitle'
+import { useMeta } from '@/composables/useMeta'
 import LoadState from '@/components/LoadState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 usePageTitle('标签')
+useMeta({ description: '按标签浏览博客文章' })
 const { data, loading, error, run } = useRequest<Tag[]>(getTagList)
 
 /** 字号随文章数轻微浮动，形成标签云观感 */
