@@ -116,6 +116,7 @@ const year = new Date().getFullYear()
       <template v-if="userStore.isLoggedIn">
         <RouterLink to="/write" class="nav-link">写文章</RouterLink>
         <RouterLink to="/my/articles" class="nav-link">我的投稿</RouterLink>
+        <RouterLink to="/settings" class="nav-link" :class="{ active: route.path === '/settings' }">个人设置</RouterLink>
         <button type="button" class="nav-link" @click="handleLogout">退出</button>
       </template>
       <template v-else>
@@ -150,6 +151,7 @@ const year = new Date().getFullYear()
             <RouterLink class="mobile-link" to="/write">写文章</RouterLink>
             <RouterLink class="mobile-link" to="/my/articles">我的投稿</RouterLink>
             <RouterLink class="mobile-link" :to="`/user/${userStore.user?.id}`">个人主页</RouterLink>
+            <RouterLink class="mobile-link" to="/settings">个人设置</RouterLink>
             <button type="button" class="mobile-link logout" @click="handleLogout">退出登录</button>
           </template>
           <template v-else>

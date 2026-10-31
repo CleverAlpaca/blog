@@ -47,10 +47,13 @@ request.interceptors.response.use(
       if (body.code === 200) {
         return body.data as never
       }
-      // 登录态失效（token 过期/被封禁）：清空本地会话
+      // 登录态失效（token 过期/被封禁）：清空本地会话并同步内存态（页头立即回到游客态）
       if (body.code === 401) {
         localStorage.removeItem('front_token')
         localStorage.removeItem('front_user')
+        import('@/stores/user')
+          .then(({ useUserStore }) => useUserStore().expire())
+          .catch(() => {})
       }
       const message = body.message || '请求失败'
       showToast(message)

@@ -93,6 +93,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '我的投稿', requiresAuth: true }
   },
   {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/Settings.vue'),
+    meta: { title: '个人设置', requiresAuth: true }
+  },
+  {
     path: '/user/:id',
     name: 'user-home',
     component: () => import('@/views/UserHome.vue'),

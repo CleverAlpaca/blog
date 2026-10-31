@@ -73,5 +73,16 @@ export const useUserStore = defineStore('frontUser', () => {
     clear()
   }
 
-  return { token, role, user, isLoggedIn, isAdmin, login, register, logout, expire }
+  /** 仅清理本地登录态（不发 logout 请求）——密码修改等后端已踢会话的场景使用 */
+  function clearSession(): void {
+    clear()
+  }
+
+  /** 资料变更（昵称/头像/简介/邮箱）后同步本地登录态 */
+  function updateUser(data: UserVO): void {
+    user.value = data
+    localStorage.setItem(USER_KEY, JSON.stringify(data))
+  }
+
+  return { token, role, user, isLoggedIn, isAdmin, login, register, logout, expire, updateUser, clearSession }
 })
