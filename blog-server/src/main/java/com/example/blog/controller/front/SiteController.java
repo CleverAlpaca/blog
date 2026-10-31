@@ -1,6 +1,7 @@
 package com.example.blog.controller.front;
 
 import com.example.blog.common.Result;
+import com.example.blog.service.SiteConfigService;
 import com.example.blog.service.SiteService;
 import com.example.blog.vo.AboutVO;
 import com.example.blog.vo.SiteStatsVO;
@@ -11,12 +12,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/front")
 @RequiredArgsConstructor
 public class SiteController {
 
     private final SiteService siteService;
+    private final SiteConfigService siteConfigService;
 
     @GetMapping("/about")
     public Result<AboutVO> about() {
@@ -26,6 +30,12 @@ public class SiteController {
     @GetMapping("/stats")
     public Result<SiteStatsVO> stats() {
         return Result.ok(siteService.stats());
+    }
+
+    /** 站点公开配置（site_name / site_description / announcement / icp） */
+    @GetMapping("/site-config")
+    public Result<Map<String, String>> siteConfig() {
+        return Result.ok(siteConfigService.getPublicMap());
     }
 
     /** RSS 2.0 订阅源（返回原始 XML，不走统一响应包装） */

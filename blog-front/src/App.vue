@@ -75,7 +75,7 @@ const year = new Date().getFullYear()
     <div class="container header-inner">
       <RouterLink to="/" class="logo">
         <span class="logo-mark">A</span>
-        <span class="logo-text">Alpaca's Blog</span>
+        <span class="logo-text">{{ siteStore.siteName }}</span>
       </RouterLink>
 
       <nav class="nav">
@@ -146,12 +146,14 @@ const year = new Date().getFullYear()
   <footer class="site-footer">
     <div class="container footer-inner">
       <p class="footer-line">
-        © {{ year }} <RouterLink to="/" class="footer-link">Alpaca's Blog</RouterLink> · 已运行
+        © {{ year }} <RouterLink to="/" class="footer-link">{{ siteStore.siteName }}</RouterLink> · 已运行
         <strong>{{ siteStore.stats?.runDays ?? '--' }}</strong> 天
       </p>
       <p class="footer-line muted">
-        <span class="beian">X ICP 备 00000000 号-1</span>
-        <span class="divider">|</span>
+        <template v-if="siteStore.icp">
+          <span class="beian">{{ siteStore.icp }}</span>
+          <span class="divider">|</span>
+        </template>
         <a class="footer-rss" href="/api/front/rss.xml" target="_blank" title="RSS 订阅">
           <AppIcon name="rss" :size="12" />
           RSS

@@ -83,6 +83,7 @@ const menus = [
   { path: '/comments', title: '评论管理', icon: 'ChatDotRound' },
   { path: '/messages', title: '留言管理', icon: 'ChatLineSquare' },
   { path: '/friend-links', title: '友链管理', icon: 'Link' },
+  { path: '/site-config', title: '站点配置', icon: 'Setting' },
   { path: '/profile', title: '个人资料', icon: 'User' }
 ]
 

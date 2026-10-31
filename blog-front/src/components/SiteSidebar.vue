@@ -66,6 +66,12 @@ function coverLetter(title: string): string {
       </div>
     </div>
 
+    <!-- 站点公告（后台「站点配置」维护，留空隐藏） -->
+    <div v-if="siteStore.announcement" class="card announcement-card">
+      <h3 class="card-title">公告</h3>
+      <p class="announcement-text">{{ siteStore.announcement }}</p>
+    </div>
+
     <!-- 热门文章 Top5 -->
     <div class="card hot-card">
       <h3 class="card-title">热门文章</h3>
@@ -105,6 +111,18 @@ function coverLetter(title: string): string {
   padding: 24px 20px;
   text-align: center;
   background: var(--color-card);
+}
+
+.announcement-card {
+  margin-top: 16px;
+}
+
+.announcement-text {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .author {

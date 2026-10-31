@@ -169,3 +169,18 @@ CREATE TABLE `message` (
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '留言板表';
+
+-- -------------------------------------------------------------
+-- 10. 站点配置表（键值对：站点名称/描述/公告/备案号等，后台可视化维护）
+-- -------------------------------------------------------------
+CREATE TABLE `site_config` (
+  `id`           BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `config_key`   VARCHAR(50)   NOT NULL                COMMENT '配置键（如 site_name/announcement/icp）',
+  `config_value` VARCHAR(1000) NOT NULL DEFAULT ''     COMMENT '配置值',
+  `description`  VARCHAR(255)  NOT NULL DEFAULT ''     COMMENT '配置说明（后台展示用）',
+  `deleted`      TINYINT       NOT NULL DEFAULT 0      COMMENT '逻辑删除：0 未删 / 1 已删',
+  `create_time`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_config_key` (`config_key`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点配置表';

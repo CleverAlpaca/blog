@@ -73,6 +73,12 @@ const router = createRouter({
           meta: { title: '友链管理' }
         },
         {
+          path: 'site-config',
+          name: 'site-config',
+          component: () => import('@/views/SiteConfig.vue'),
+          meta: { title: '站点配置' }
+        },
+        {
           path: 'profile',
           name: 'profile',
           component: () => import('@/views/Profile.vue'),

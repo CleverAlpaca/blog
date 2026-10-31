@@ -11,6 +11,7 @@ import com.example.blog.mapper.CategoryMapper;
 import com.example.blog.mapper.CommentMapper;
 import com.example.blog.mapper.TagMapper;
 import com.example.blog.mapper.UserMapper;
+import com.example.blog.service.SiteConfigService;
 import com.example.blog.service.SiteService;
 import com.example.blog.vo.AboutVO;
 import com.example.blog.vo.SiteStatsVO;
@@ -34,6 +35,7 @@ public class SiteServiceImpl implements SiteService {
     private final CategoryMapper categoryMapper;
     private final TagMapper tagMapper;
     private final CommentMapper commentMapper;
+    private final SiteConfigService siteConfigService;
 
     @Value("${blog.site-name}")
     private String siteName;
@@ -94,14 +96,17 @@ public class SiteServiceImpl implements SiteService {
                 .select(Article::getId, Article::getTitle, Article::getSummary, Article::getCreateTime)
                 .last("LIMIT 20"));
 
+        // 站点名称/描述优先取站点配置表，未配置时回退 application.yml 属性
+        String name = siteConfigService.getValue("site_name", siteName);
+        String description = siteConfigService.getValue("site_description", name + " 最新文章");
         DateTimeFormatter fmt = DateTimeFormatter.RFC_1123_DATE_TIME
                 .withLocale(Locale.ENGLISH).withZone(ZoneId.of("GMT"));
         StringBuilder xml = new StringBuilder(1024);
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         xml.append("<rss version=\"2.0\">\n<channel>\n");
-        xml.append("<title>").append(escape(siteName)).append("</title>\n");
+        xml.append("<title>").append(escape(name)).append("</title>\n");
         xml.append("<link>").append(escape(siteUrl)).append("</link>\n");
-        xml.append("<description>").append(escape(siteName)).append(" 最新文章</description>\n");
+        xml.append("<description>").append(escape(description)).append("</description>\n");
         for (Article a : list) {
             String link = siteUrl + "/article/" + a.getId();
             xml.append("<item>\n")

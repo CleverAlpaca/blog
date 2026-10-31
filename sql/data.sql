@@ -124,3 +124,12 @@ UPDATE `article` SET `comment_count` = 2 WHERE `id` = 2;
 -- -------------------------------------------------------------
 INSERT INTO `message` (`parent_id`, `nickname`, `email`, `content`, `status`, `ip`) VALUES
 (NULL, '路过的访客', '', '留言板测试：网站挺好看的，加油！', 1, '127.0.0.1');
+
+-- -------------------------------------------------------------
+-- 9. 站点配置（键值对，后台「站点配置」页可视化维护）
+-- -------------------------------------------------------------
+INSERT INTO `site_config` (`config_key`, `config_value`, `description`) VALUES
+('site_name', 'Alpaca''s Blog', '站点名称：前台 Logo/页脚/浏览器标题后缀/RSS 频道名'),
+('site_description', '记录技术、设计与生活的个人博客——前后端分离架构实践、学习笔记与生活随笔', '站点描述：首页 SEO description 与 RSS 频道描述'),
+('announcement', '博客已支持暗黑模式与 RSS 订阅，欢迎体验。', '站点公告：展示在前台侧栏，留空则隐藏'),
+('icp', 'X ICP 备 00000000 号-1', '备案号：展示在前台页脚，留空则隐藏');

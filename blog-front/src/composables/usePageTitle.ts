@@ -1,5 +1,6 @@
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useSiteStore } from '@/stores/site'
 import { upsertMeta } from './useMeta'
 
 const SITE_NAME = "Alpaca's Blog"
@@ -9,8 +10,10 @@ export function usePageTitle(title?: string | (() => string | undefined)): void 
   const route = useRoute()
 
   const apply = (): void => {
+    // 站点名优先取站点配置表（后台可视化维护），未加载/未配置时回退默认值
+    const siteName = useSiteStore().config?.site_name || SITE_NAME
     const value = typeof title === 'function' ? title() : title
-    document.title = value ? `${value} - ${SITE_NAME}` : SITE_NAME
+    document.title = value ? `${value} - ${siteName}` : siteName
     // og:title 供分享卡片使用
     upsertMeta('property', 'og:title', document.title)
   }
