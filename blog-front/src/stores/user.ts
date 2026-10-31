@@ -49,7 +49,13 @@ export const useUserStore = defineStore('frontUser', () => {
     setSession(await loginApi({ username, password }))
   }
 
-  async function register(body: { username: string; password: string; nickname?: string; email?: string }): Promise<void> {
+  async function register(body: {
+    username: string
+    password: string
+    nickname?: string
+    email: string
+    emailCode: string
+  }): Promise<void> {
     setSession(await registerApi(body))
   }
 

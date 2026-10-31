@@ -176,6 +176,17 @@ export interface UserHome {
   badge: string
 }
 
+/** 个人主页评论项（UserCommentVO） */
+export interface UserCommentItem {
+  id: number
+  articleId: number
+  articleTitle: string
+  /** 回复的评论 ID（顶级评论为 null） */
+  parentId: number | null
+  content: string
+  createTime: string
+}
+
 /** 文章列表查询参数 */
 export interface ArticleQuery {
   pageNum?: number

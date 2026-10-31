@@ -59,6 +59,8 @@ async function handleSubmit(): Promise<void> {
       <p class="auth-switch">
         还没有账号？
         <RouterLink class="switch-link" :to="{ path: '/register', query: route.query }">立即注册</RouterLink>
+        <span class="switch-divider">·</span>
+        <RouterLink class="switch-link subtle" :to="{ path: '/forgot-password', query: route.query }">忘记密码？</RouterLink>
       </p>
       <p class="auth-back">
         <RouterLink to="/" class="back-link"><AppIcon name="home" :size="13" /> 返回首页</RouterLink>
@@ -124,6 +126,20 @@ async function handleSubmit(): Promise<void> {
 .switch-link {
   color: var(--color-primary);
   font-weight: 600;
+}
+
+.switch-divider {
+  margin: 0 4px;
+  color: var(--color-text-tertiary);
+}
+
+.switch-link.subtle {
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+
+.switch-link.subtle:hover {
+  color: var(--color-primary);
 }
 
 .auth-back {

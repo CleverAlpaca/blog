@@ -1,14 +1,35 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ArticleCard } from '@/types/api'
 import { getHotArticles } from '@/api/article'
 import { useRequest } from '@/composables/useRequest'
 import { useSiteStore } from '@/stores/site'
+import { useUserStore } from '@/stores/user'
 import { formatCount } from '@/utils/format'
 import AppIcon from './AppIcon.vue'
 import LoadState from './LoadState.vue'
 
 const siteStore = useSiteStore()
+const userStore = useUserStore()
 const { data: hotArticles, loading, error, run } = useRequest<ArticleCard[]>(getHotArticles)
+
+// 身份区随登录态切换：登录显示当前用户，访客显示博主（站点信息）
+const displayName = computed(() =>
+  userStore.isLoggedIn && userStore.user?.nickname
+    ? userStore.user.nickname
+    : siteStore.about?.nickname || "Alpaca's Blog"
+)
+const displayIntro = computed(() =>
+  userStore.isLoggedIn
+    ? userStore.user?.intro || '还没有填写简介'
+    : siteStore.about?.intro || '记录技术，分享生活。'
+)
+const displayAvatar = computed(() =>
+  userStore.isLoggedIn ? userStore.user?.avatar : siteStore.about?.avatar
+)
+const displayBadge = computed(() =>
+  userStore.isLoggedIn ? (userStore.isAdmin ? '博主' : '作者') : '博主'
+)
 
 function coverLetter(title: string): string {
   return title.charAt(0) || '文'
@@ -17,24 +38,31 @@ function coverLetter(title: string): string {
 
 <template>
   <aside class="side-column">
-    <!-- 站点信息卡 -->
+    <!-- 站点信息卡：登录后展示当前用户，访客展示博主 -->
     <div class="card site-card">
       <div class="author">
         <img
-          v-if="siteStore.about?.avatar"
-          :src="siteStore.about.avatar"
-          :alt="siteStore.about.nickname"
+          v-if="displayAvatar"
+          :src="displayAvatar"
+          :alt="displayName"
           class="avatar"
           @error="($event.target as HTMLImageElement).style.visibility = 'hidden'"
         />
         <div v-else class="avatar avatar-fallback">
           <AppIcon name="user" :size="26" />
         </div>
-        <h3 class="nickname">{{ siteStore.about?.nickname || "Alpaca's Blog" }}</h3>
-        <p class="intro">{{ siteStore.about?.intro || '记录技术，分享生活。' }}</p>
+        <h3 class="nickname">
+          {{ displayName }}
+          <span class="role-badge" :class="{ admin: userStore.isAdmin && userStore.isLoggedIn }">{{ displayBadge }}</span>
+        </h3>
+        <p class="intro">{{ displayIntro }}</p>
+        <RouterLink v-if="userStore.isLoggedIn && userStore.user" :to="`/user/${userStore.user.id}`" class="me-link">
+          进入我的主页 →
+        </RouterLink>
       </div>
 
       <div class="stat-grid">
+        <p class="stat-caption">全站统计</p>
         <RouterLink to="/archive" class="stat-cell">
           <strong>{{ siteStore.stats?.articleCount ?? '--' }}</strong>
           <span>
@@ -153,6 +181,33 @@ function coverLetter(title: string): string {
   margin-top: 4px;
   font-size: 17px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--color-chip);
+  color: var(--color-text-secondary);
+}
+
+.role-badge.admin {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.me-link {
+  font-size: 12.5px;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.me-link:hover {
+  text-decoration: underline;
 }
 
 .intro {
@@ -172,6 +227,15 @@ function coverLetter(title: string): string {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+}
+
+.stat-caption {
+  grid-column: 1 / -1;
+  margin: -4px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.08em;
 }
 
 .stat-cell {

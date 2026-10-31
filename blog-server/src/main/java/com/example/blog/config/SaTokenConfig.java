@@ -30,12 +30,13 @@ public class SaTokenConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/admin/**")
                 .excludePathPatterns("/api/admin/login");
 
-        // 前台登录态端点：我的投稿 / 资料 / 改密 / 登出
+        // 前台登录态端点：我的投稿 / 资料 / 改密 / 登出 / 换绑邮箱
         registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
                 .addPathPatterns(
                         "/api/front/my/**",
                         "/api/front/auth/profile",
                         "/api/front/auth/password",
+                        "/api/front/auth/email",
                         "/api/front/auth/logout");
     }
 }

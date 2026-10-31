@@ -8,6 +8,17 @@ spring:
     redis:
       host: localhost
       port: 6379
+  mail:
+    # v2.0 邮件服务（QQ SMTP，465 SSL）。授权码不写进仓库（公开 repo）：
+    # 启动时注入环境变量 MAIL_PASSWORD=<授权码> 与 MAIL_TYPE=smtp 即发真实邮件；
+    # 不注入则 MAIL_TYPE 默认 log，验证码打到后端日志 [MAIL-LOG-SIM]
+    host: smtp.qq.com
+    port: 465
+    username: 2295332582@qq.com
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
 
 logging:
   level:
@@ -23,3 +34,7 @@ blog:
       access-key-secret: minioadmin
       bucket: blog
       host: http://127.0.0.1:9000/blog
+  mail:
+    # log=日志模拟发信（默认）/ smtp=真实发信（需上面 spring.mail.password 注入授权码）
+    type: ${MAIL_TYPE:log}
+    from: 2295332582@qq.com

@@ -8,7 +8,20 @@ spring:
     redis:
       host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
+  mail:
+    # 生产 SMTP（QQ/163 等需在邮箱后台开启 SMTP 并使用授权码）
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
 
 blog:
   site-url: ${SITE_URL:http://localhost:5173}
   upload-dir: ${UPLOAD_DIR:/app/upload}
+  mail:
+    # 未提供 MAIL_HOST 时降级为日志模拟发信
+    type: ${MAIL_TYPE:log}
+    from: ${MAIL_FROM:blog@localhost}

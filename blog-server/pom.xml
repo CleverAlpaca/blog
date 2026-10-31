@@ -72,6 +72,13 @@
             <version>${sa-token.version}</version>
         </dependency>
 
+        <!-- 邮件（v2.0 邮箱验证/找回密码）：未配置 spring.mail.host 时不装配 JavaMailSender，
+             默认走 blog.mail.type=log 的日志模拟发信 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- 仅用 BCrypt，不引入完整 Spring Security 过滤链 -->
         <dependency>
             <groupId>org.springframework.security</groupId>

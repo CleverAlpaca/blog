@@ -2,8 +2,11 @@ package com.example.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.blog.common.BusinessException;
 import com.example.blog.common.ErrorCode;
+import com.example.blog.dto.EmailBindRequest;
+import com.example.blog.dto.ForgotPasswordRequest;
 import com.example.blog.dto.LoginRequest;
 import com.example.blog.dto.PasswordUpdateRequest;
 import com.example.blog.dto.ProfileUpdateRequest;
@@ -11,6 +14,7 @@ import com.example.blog.dto.RegisterRequest;
 import com.example.blog.entity.User;
 import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.AuthService;
+import com.example.blog.service.EmailCodeService;
 import com.example.blog.service.UserService;
 import com.example.blog.util.RateLimitUtil;
 import com.example.blog.vo.FrontLoginVO;
@@ -29,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final RateLimitUtil rateLimitUtil;
+    private final EmailCodeService emailCodeService;
 
     @Override
     public FrontLoginVO register(RegisterRequest request, String ip) {
@@ -37,11 +42,12 @@ public class AuthServiceImpl implements AuthService {
         if (userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getUsername, username)) > 0) {
             throw new BusinessException(400, "用户名已被占用");
         }
-        String email = request.getEmail() == null ? "" : request.getEmail().trim();
-        if (!email.isEmpty()
-                && userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getEmail, email)) > 0) {
+        String email = request.getEmail().trim();
+        if (userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getEmail, email)) > 0) {
             throw new BusinessException(400, "邮箱已被占用");
         }
+        // 校验并消费验证码：放在最后，前面的校验失败不浪费验证码
+        emailCodeService.verifyCode("register", email, request.getEmailCode());
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -88,6 +94,36 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void updatePassword(PasswordUpdateRequest request) {
         userService.updatePassword(StpUtil.getLoginIdAsLong(), request);
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+        String email = request.getEmail().trim();
+        emailCodeService.verifyCode("reset", email, request.getCode());
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email));
+        if (user == null) {
+            // 防枚举：静默成功（实际无此账号）
+            return;
+        }
+        userMapper.update(null, new UpdateWrapper<User>()
+                .eq("id", user.getId())
+                .set("password", passwordEncoder.encode(request.getNewPassword())));
+        // 重置成功即踢下线，旧会话全部失效
+        StpUtil.logout(user.getId());
+    }
+
+    @Override
+    public void updateEmail(EmailBindRequest request) {
+        long uid = StpUtil.getLoginIdAsLong();
+        String email = request.getEmail().trim();
+        emailCodeService.verifyCode("bind", email, request.getCode());
+        if (userMapper.selectCount(new LambdaQueryWrapper<User>()
+                .eq(User::getEmail, email).ne(User::getId, uid)) > 0) {
+            throw new BusinessException(400, "该邮箱已被其他账号绑定");
+        }
+        userMapper.update(null, new UpdateWrapper<User>()
+                .eq("id", uid)
+                .set("email", email));
     }
 
     private FrontLoginVO buildLoginVO(User user) {

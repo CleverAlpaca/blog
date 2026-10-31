@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { sendEmailCode } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import { usePageTitle } from '@/composables/usePageTitle'
 import AppIcon from '@/components/AppIcon.vue'
@@ -11,9 +12,47 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const form = ref({ username: '', password: '', confirm: '', nickname: '', email: '' })
+const form = ref({ username: '', password: '', confirm: '', nickname: '', email: '', emailCode: '' })
 const loading = ref(false)
 const error = ref('')
+const codeSending = ref(false)
+const countdown = ref(0)
+let timer: number | undefined
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function startCountdown(): void {
+  countdown.value = 60
+  timer = window.setInterval(() => {
+    countdown.value -= 1
+    if (countdown.value <= 0 && timer) {
+      window.clearInterval(timer)
+      timer = undefined
+    }
+  }, 1000)
+}
+
+onUnmounted(() => {
+  if (timer) window.clearInterval(timer)
+})
+
+async function handleSendCode(): Promise<void> {
+  const email = form.value.email.trim()
+  if (!EMAIL_RE.test(email)) {
+    error.value = '请输入正确的邮箱地址'
+    return
+  }
+  codeSending.value = true
+  error.value = ''
+  try {
+    await sendEmailCode({ scene: 'register', email })
+    startCountdown()
+  } catch (e) {
+    error.value = e instanceof Error && e.message ? e.message : '验证码发送失败，请稍后重试'
+  } finally {
+    codeSending.value = false
+  }
+}
 
 async function handleSubmit(): Promise<void> {
   const username = form.value.username.trim()
@@ -27,6 +66,14 @@ async function handleSubmit(): Promise<void> {
     error.value = '两次输入的密码不一致'
     return
   }
+  if (!EMAIL_RE.test(email)) {
+    error.value = '请输入正确的邮箱地址'
+    return
+  }
+  if (!form.value.emailCode.trim()) {
+    error.value = '请输入邮箱验证码'
+    return
+  }
   loading.value = true
   error.value = ''
   try {
@@ -34,7 +81,8 @@ async function handleSubmit(): Promise<void> {
       username,
       password: form.value.password,
       nickname: nickname || undefined,
-      email: email || undefined
+      email,
+      emailCode: form.value.emailCode.trim()
     })
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     router.push(redirect)
@@ -70,8 +118,22 @@ async function handleSubmit(): Promise<void> {
           <input id="reg-nickname" v-model="form.nickname" class="form-input" type="text" maxlength="32" />
         </div>
         <div class="field">
-          <label class="field-label" for="reg-email">邮箱（选填）</label>
+          <label class="field-label" for="reg-email">邮箱（用于登录与找回密码）</label>
           <input id="reg-email" v-model="form.email" class="form-input" type="email" maxlength="128" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="reg-code">邮箱验证码</label>
+          <div class="code-row">
+            <input id="reg-code" v-model="form.emailCode" class="form-input" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+            <button
+              type="button"
+              class="btn btn-ghost code-btn"
+              :disabled="codeSending || countdown > 0"
+              @click="handleSendCode"
+            >
+              {{ countdown > 0 ? `${countdown}s 后重发` : codeSending ? '发送中…' : '获取验证码' }}
+            </button>
+          </div>
         </div>
         <p v-if="error" class="auth-error">{{ error }}</p>
         <button class="btn btn-primary auth-submit" type="submit" :disabled="loading">
@@ -130,6 +192,22 @@ async function handleSubmit(): Promise<void> {
 
 .auth-error {
   color: var(--color-danger);
+  font-size: 13px;
+}
+
+.code-row {
+  display: flex;
+  gap: 8px;
+}
+
+.code-row .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.code-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
   font-size: 13px;
 }
 

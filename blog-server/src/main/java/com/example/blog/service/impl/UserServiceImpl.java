@@ -53,7 +53,6 @@ public class UserServiceImpl implements UserService {
         user.setId(userId);
         user.setNickname(request.getNickname());
         user.setAvatar(request.getAvatar());
-        user.setEmail(request.getEmail());
         user.setIntro(request.getIntro());
         userMapper.updateById(user);
     }

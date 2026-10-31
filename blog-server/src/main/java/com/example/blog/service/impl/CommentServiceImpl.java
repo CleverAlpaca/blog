@@ -18,6 +18,7 @@ import com.example.blog.service.CommentService;
 import com.example.blog.util.RateLimitUtil;
 import com.example.blog.vo.AdminCommentVO;
 import com.example.blog.vo.CommentVO;
+import com.example.blog.vo.UserCommentVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -106,6 +107,37 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "回复的评论不存在或已隐藏");
         }
         return parent.getParentId() != null ? parent.getParentId() : parent.getId();
+    }
+
+    @Override
+    public PageResult<UserCommentVO> pageByUser(Long userId, long pageNum, long pageSize) {
+        User user = userMapper.selectById(userId);
+        if (user == null || user.getStatus() == 0) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在或已被封禁");
+        }
+        LambdaQueryWrapper<Comment> w = new LambdaQueryWrapper<Comment>()
+                .eq(Comment::getUserId, userId)
+                .eq(Comment::getStatus, 1)
+                // 仅挂在已发布文章下的评论（草稿/下架文章的评论不在主页展示）
+                .inSql(Comment::getArticleId, "SELECT id FROM article WHERE status = 1 AND deleted = 0")
+                .orderByDesc(Comment::getCreateTime).orderByDesc(Comment::getId);
+        Page<Comment> page = commentMapper.selectPage(new Page<>(pageNum, pageSize), w);
+        Set<Long> articleIds = page.getRecords().stream()
+                .map(Comment::getArticleId).filter(Objects::nonNull).collect(Collectors.toSet());
+        Map<Long, String> titles = articleIds.isEmpty() ? Map.of()
+                : articleMapper.selectBatchIds(articleIds).stream()
+                        .collect(Collectors.toMap(Article::getId, Article::getTitle));
+        List<UserCommentVO> vos = page.getRecords().stream().map(c -> {
+            UserCommentVO vo = new UserCommentVO();
+            vo.setId(c.getId());
+            vo.setArticleId(c.getArticleId());
+            vo.setArticleTitle(titles.get(c.getArticleId()));
+            vo.setParentId(c.getParentId());
+            vo.setContent(c.getContent());
+            vo.setCreateTime(c.getCreateTime());
+            return vo;
+        }).toList();
+        return new PageResult<>(vos, page.getTotal(), page.getCurrent(), page.getSize());
     }
 
     @Override
