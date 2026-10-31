@@ -60,8 +60,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public PageResult<ArticleCardVO> pageFront(long pageNum, long pageSize, Long categoryId, Long tagId, String keyword) {
         LambdaQueryWrapper<Article> w = frontWrapper()
-                .like(StringUtils.hasText(keyword), Article::getTitle, keyword)
                 .eq(categoryId != null, Article::getCategoryId, categoryId);
+        applyKeyword(w, keyword);
         if (tagId != null) {
             List<Long> ids = articleIdsOfTag(tagId);
             if (ids.isEmpty()) {
@@ -122,8 +122,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<ArticleCardVO> pageAdmin(long pageNum, long pageSize, String keyword, Integer status, Long categoryId) {
-        LambdaQueryWrapper<Article> w = new LambdaQueryWrapper<Article>()
-                .like(StringUtils.hasText(keyword), Article::getTitle, keyword)
+        LambdaQueryWrapper<Article> w = applyKeyword(new LambdaQueryWrapper<Article>(), keyword)
                 .eq(status != null, Article::getStatus, status)
                 .eq(categoryId != null, Article::getCategoryId, categoryId)
                 .orderByDesc(Article::getCreateTime).orderByDesc(Article::getId);
@@ -172,6 +171,21 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     // ---------------------------------------------------------------
+
+    /**
+     * 关键词过滤：≥2 字符走 MySQL FULLTEXT（ngram 分词，标题+摘要+正文，
+     * 短语模式避免布尔运算符干扰）；单字符（ngram 最小 token 限制）回退标题模糊匹配
+     */
+    private LambdaQueryWrapper<Article> applyKeyword(LambdaQueryWrapper<Article> w, String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return w;
+        }
+        String kw = keyword.trim();
+        if (kw.length() >= 2) {
+            return w.apply("MATCH(title, summary, content) AGAINST({0} IN BOOLEAN MODE)", "\"" + kw + "\"");
+        }
+        return w.like(Article::getTitle, kw);
+    }
 
     private LambdaQueryWrapper<Article> frontWrapper() {
         return new LambdaQueryWrapper<Article>()

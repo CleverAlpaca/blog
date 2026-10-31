@@ -57,7 +57,8 @@ CREATE TABLE `article` (
   KEY `idx_category_id` (`category_id`),
   KEY `idx_status_create_time` (`status`, `create_time`),
   KEY `idx_create_time` (`create_time`),
-  KEY `idx_title` (`title`(100))
+  KEY `idx_title` (`title`(100)),
+  FULLTEXT INDEX `ft_article_search` (`title`, `summary`, `content`) WITH PARSER ngram
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文章表';
 
 -- -------------------------------------------------------------
