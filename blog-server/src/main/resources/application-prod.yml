@@ -25,3 +25,8 @@ blog:
     # 未提供 MAIL_HOST 时降级为日志模拟发信
     type: ${MAIL_TYPE:log}
     from: ${MAIL_FROM:blog@localhost}
+  oauth:
+    github:
+      client-id: ${GITHUB_CLIENT_ID:}
+      client-secret: ${GITHUB_CLIENT_SECRET:}
+      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost/auth/github}

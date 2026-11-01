@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { login as loginApi, logout as logoutApi, register as registerApi } from '@/api/auth'
+import { githubCallback as githubCallbackApi, login as loginApi, logout as logoutApi, register as registerApi } from '@/api/auth'
 import type { FrontLogin, UserVO } from '@/types/api'
 
 const TOKEN_KEY = 'front_token'
@@ -78,11 +78,15 @@ export const useUserStore = defineStore('frontUser', () => {
     clear()
   }
 
+  async function githubLogin(code: string, state: string): Promise<void> {
+    setSession(await githubCallbackApi({ code, state }))
+  }
+
   /** 资料变更（昵称/头像/简介/邮箱）后同步本地登录态 */
   function updateUser(data: UserVO): void {
     user.value = data
     localStorage.setItem(USER_KEY, JSON.stringify(data))
   }
 
-  return { token, role, user, isLoggedIn, isAdmin, login, register, logout, expire, updateUser, clearSession }
+  return { token, role, user, isLoggedIn, isAdmin, login, register, logout, expire, updateUser, clearSession, githubLogin }
 })

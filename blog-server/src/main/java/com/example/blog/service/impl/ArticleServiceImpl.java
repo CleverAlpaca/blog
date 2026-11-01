@@ -24,6 +24,7 @@ import com.example.blog.mapper.LikeRecordMapper;
 import com.example.blog.mapper.TagMapper;
 import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.ArticleService;
+import com.example.blog.service.NotifyService;
 import com.example.blog.vo.AdminReviewVO;
 import com.example.blog.vo.ArchiveItemVO;
 import com.example.blog.vo.ArchiveYearVO;
@@ -63,6 +64,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final LikeRecordMapper likeRecordMapper;
     private final UserMapper userMapper;
     private final StringRedisTemplate stringRedisTemplate;
+    private final NotifyService notifyService;
 
     @Override
     public PageResult<ArticleCardVO> pageFront(long pageNum, long pageSize, Long categoryId, Long tagId, String keyword) {
@@ -344,6 +346,8 @@ public class ArticleServiceImpl implements ArticleService {
                 .set("status", 1)
                 .set("review_time", LocalDateTime.now())
                 .set("reject_reason", ""));
+        // 旁路通知：审核结果邮件（失败不影响主流程）
+        notifyService.notifyReviewResult(id, true, null);
     }
 
     @Override
@@ -353,6 +357,8 @@ public class ArticleServiceImpl implements ArticleService {
                 .eq("id", id)
                 .set("status", 4)
                 .set("reject_reason", reason));
+        // 旁路通知：审核结果邮件（失败不影响主流程）
+        notifyService.notifyReviewResult(id, false, reason);
     }
 
     private Article requireForReview(Long id) {

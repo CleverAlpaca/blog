@@ -126,6 +126,14 @@ public class AuthServiceImpl implements AuthService {
                 .set("email", email));
     }
 
+    @Override
+    public void updateNotifySwitch(Boolean enabled) {
+        long uid = StpUtil.getLoginIdAsLong();
+        userMapper.update(null, new UpdateWrapper<User>()
+                .eq("id", uid)
+                .set("email_notify", Boolean.TRUE.equals(enabled) ? 1 : 0));
+    }
+
     private FrontLoginVO buildLoginVO(User user) {
         FrontLoginVO vo = new FrontLoginVO();
         vo.setToken(StpUtil.getTokenValue());
@@ -143,6 +151,8 @@ public class AuthServiceImpl implements AuthService {
         vo.setIntro(user.getIntro());
         vo.setEmail(user.getEmail());
         vo.setRole(user.getRole());
+        vo.setGithubId(user.getGithubId());
+        vo.setEmailNotify(user.getEmailNotify());
         return vo;
     }
 }

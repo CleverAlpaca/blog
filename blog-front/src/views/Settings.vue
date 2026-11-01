@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getProfile, sendEmailCode, updateEmail, updatePassword, updateProfile } from '@/api/auth'
+import { getProfile, githubAuthorize, sendEmailCode, updateEmail, updateNotifySwitch, updatePassword, updateProfile } from '@/api/auth'
 import { uploadMyImage } from '@/api/my'
 import { usePageTitle } from '@/composables/usePageTitle'
 import { useUserStore } from '@/stores/user'
@@ -78,6 +78,39 @@ async function saveProfile(): Promise<void> {
     /* 拦截器已提示 */
   } finally {
     profileSaving.value = false
+  }
+}
+
+// ---------- 通知与绑定 ----------
+const notifySaving = ref(false)
+
+async function toggleNotify(): Promise<void> {
+  const enabled = userStore.user?.emailNotify !== 1
+  notifySaving.value = true
+  try {
+    await updateNotifySwitch(enabled)
+    userStore.updateUser(await getProfile())
+    showSuccess(enabled ? '已开启邮件通知' : '已关闭邮件通知')
+  } catch {
+    /* 拦截器已提示 */
+  } finally {
+    notifySaving.value = false
+  }
+}
+
+const githubBinding = ref(false)
+
+async function bindGithub(): Promise<void> {
+  githubBinding.value = true
+  try {
+    const url = await githubAuthorize()
+    // 落地页换绑成功后回到设置页
+    sessionStorage.setItem('github_redirect', '/settings')
+    window.location.href = url
+  } catch {
+    /* 拦截器已提示 */
+  } finally {
+    githubBinding.value = false
   }
 }
 
@@ -257,6 +290,38 @@ async function saveEmail(): Promise<void> {
           {{ emailSaving ? '换绑中…' : '确认换绑' }}
         </button>
       </div>
+    </section>
+
+    <!-- 通知与绑定 -->
+    <section class="card settings-card">
+      <h2 class="card-title">通知与绑定</h2>
+      <div class="bind-row">
+        <div>
+          <p class="bind-label">审核结果邮件通知</p>
+          <p class="bind-hint">投稿通过或退回时发送邮件到绑定邮箱</p>
+        </div>
+        <button
+          type="button"
+          class="switch-toggle"
+          :class="{ on: userStore.user?.emailNotify === 1 }"
+          :disabled="notifySaving"
+          :aria-label="userStore.user?.emailNotify === 1 ? '关闭邮件通知' : '开启邮件通知'"
+          @click="toggleNotify"
+        >
+          <span class="switch-knob"></span>
+        </button>
+      </div>
+      <div class="bind-row">
+        <div>
+          <p class="bind-label">GitHub 账号</p>
+          <p class="bind-hint">{{ userStore.user?.githubId ? '已绑定，可使用 GitHub 直接登录' : '绑定后可使用 GitHub 直接登录' }}</p>
+        </div>
+        <span v-if="userStore.user?.githubId" class="bind-done">已绑定</span>
+        <button v-else type="button" class="btn btn-ghost bind-btn" :disabled="githubBinding" @click="bindGithub">
+          {{ githubBinding ? '跳转中…' : '绑定 GitHub' }}
+        </button>
+      </div>
+      <p class="block-hint">当前邮箱不可收信（GitHub 隐私占位邮箱）时，邮件通知与找回密码不可用，请先换绑真实邮箱</p>
     </section>
 
     <!-- 修改密码 -->
@@ -460,6 +525,77 @@ async function saveEmail(): Promise<void> {
 
 .block-hint {
   margin: -6px 0 14px;
+}
+
+.bind-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.bind-row + .bind-row {
+  border-top: 1px dashed var(--color-border);
+}
+
+.bind-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bind-hint {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--color-text-tertiary);
+}
+
+.bind-btn {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.bind-done {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.switch-toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-chip);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.switch-toggle.on {
+  background: var(--color-primary);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.switch-toggle.on .switch-knob {
+  transform: translateX(20px);
 }
 
 .form-error {

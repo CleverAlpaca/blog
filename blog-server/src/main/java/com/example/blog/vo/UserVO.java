@@ -19,4 +19,10 @@ public class UserVO {
 
     /** ADMIN / USER（前台按此区分用户态） */
     private String role;
+
+    /** GitHub 绑定状态（非空=已绑定） */
+    private Long githubId;
+
+    /** 邮件通知开关：1 开 / 0 关 */
+    private Integer emailNotify;
 }

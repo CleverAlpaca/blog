@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { githubAuthorize } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import { usePageTitle } from '@/composables/usePageTitle'
 import AppIcon from '@/components/AppIcon.vue'
@@ -14,7 +15,21 @@ const userStore = useUserStore()
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
+const githubLoading = ref(false)
 const error = ref('')
+
+async function handleGithub(): Promise<void> {
+  githubLoading.value = true
+  error.value = ''
+  try {
+    const url = await githubAuthorize()
+    window.location.href = url
+  } catch (e) {
+    error.value = e instanceof Error && e.message ? e.message : 'GitHub 登录暂不可用'
+  } finally {
+    githubLoading.value = false
+  }
+}
 
 async function handleSubmit(): Promise<void> {
   if (!username.value.trim() || !password.value) {
@@ -53,6 +68,10 @@ async function handleSubmit(): Promise<void> {
         <p v-if="error" class="auth-error">{{ error }}</p>
         <button class="btn btn-primary auth-submit" type="submit" :disabled="loading">
           {{ loading ? '登录中…' : '登录' }}
+        </button>
+        <div class="divider"><span>或</span></div>
+        <button class="btn btn-ghost auth-submit github-btn" type="button" :disabled="githubLoading" @click="handleGithub">
+          {{ githubLoading ? '跳转 GitHub…' : '使用 GitHub 登录' }}
         </button>
       </form>
 
@@ -126,6 +145,34 @@ async function handleSubmit(): Promise<void> {
 .switch-link {
   color: var(--color-primary);
   font-weight: 600;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.github-btn {
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text);
+}
+
+.github-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .switch-divider {

@@ -54,3 +54,18 @@ export function forgotPassword(body: { email: string; code: string; newPassword:
 export function updateEmail(body: { email: string; code: string }): Promise<void> {
   return put<void>('/auth/email', body)
 }
+
+/** 开关邮件通知（审核结果通知，用户级） */
+export function updateNotifySwitch(enabled: boolean): Promise<void> {
+  return put<void>('/auth/notify-switch', { enabled })
+}
+
+/** 获取 GitHub 授权页跳转 URL（后端生成一次性 state） */
+export function githubAuthorize(): Promise<string> {
+  return get<string>('/auth/github/authorize')
+}
+
+/** GitHub 回调换取登录态（前台落地页提交 code+state） */
+export function githubCallback(body: { code: string; state: string }): Promise<FrontLogin> {
+  return post<FrontLogin>('/auth/github/callback', body)
+}

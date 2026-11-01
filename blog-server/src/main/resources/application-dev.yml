@@ -38,3 +38,10 @@ blog:
     # log=日志模拟发信（默认）/ smtp=真实发信（需上面 spring.mail.password 注入授权码）
     type: ${MAIL_TYPE:log}
     from: 2295332582@qq.com
+  oauth:
+    github:
+      # GitHub OAuth App（Settings → Developer settings → OAuth Apps）
+      # callback 填前台落地路由：http://localhost:5173/auth/github；留空时前端 GitHub 入口不可用
+      client-id: ${GITHUB_CLIENT_ID:}
+      client-secret: ${GITHUB_CLIENT_SECRET:}
+      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:5173/auth/github}

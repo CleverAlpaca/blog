@@ -4,12 +4,15 @@ import com.example.blog.common.Result;
 import com.example.blog.dto.EmailBindRequest;
 import com.example.blog.dto.EmailCodeSendRequest;
 import com.example.blog.dto.ForgotPasswordRequest;
+import com.example.blog.dto.GithubCallbackRequest;
 import com.example.blog.dto.LoginRequest;
+import com.example.blog.dto.NotifySwitchRequest;
 import com.example.blog.dto.PasswordUpdateRequest;
 import com.example.blog.dto.ProfileUpdateRequest;
 import com.example.blog.dto.RegisterRequest;
 import com.example.blog.service.AuthService;
 import com.example.blog.service.EmailCodeService;
+import com.example.blog.service.GithubAuthService;
 import com.example.blog.util.IpUtil;
 import com.example.blog.vo.FrontLoginVO;
 import com.example.blog.vo.UserVO;
@@ -24,8 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 前台认证：注册 / 登录 / 登出 / 资料 / 改密 / 邮箱验证码 / 找回密码 / 换绑邮箱
- * （ADMIN 与 USER 共用，管理端另有专属接口）
+ * 前台认证：注册 / 登录 / 登出 / 资料 / 改密 / 邮箱验证码 / 找回密码 / 换绑邮箱 /
+ * GitHub OAuth 登录 / 邮件通知开关（ADMIN 与 USER 共用，管理端另有专属接口）
  */
 @RestController("frontAuthController")
 @RequestMapping("/api/front/auth")
@@ -34,6 +37,7 @@ public class FrontAuthController {
 
     private final AuthService authService;
     private final EmailCodeService emailCodeService;
+    private final GithubAuthService githubAuthService;
 
     @PostMapping("/register")
     public Result<FrontLoginVO> register(@Valid @RequestBody RegisterRequest body, HttpServletRequest request) {
@@ -87,5 +91,24 @@ public class FrontAuthController {
     public Result<Void> updateEmail(@Valid @RequestBody EmailBindRequest body) {
         authService.updateEmail(body);
         return Result.ok();
+    }
+
+    /** 邮件通知开关（用户级，个人设置页） */
+    @PutMapping("/notify-switch")
+    public Result<Void> updateNotifySwitch(@Valid @RequestBody NotifySwitchRequest body) {
+        authService.updateNotifySwitch(body.getEnabled());
+        return Result.ok();
+    }
+
+    /** GitHub 授权页跳转 URL（含一次性 state） */
+    @GetMapping("/github/authorize")
+    public Result<String> githubAuthorize(HttpServletRequest request) {
+        return Result.ok(githubAuthService.authorizeUrl(IpUtil.getIp(request)));
+    }
+
+    /** GitHub 回调换取登录态（前台落地页提交 code+state） */
+    @PostMapping("/github/callback")
+    public Result<FrontLoginVO> githubCallback(@Valid @RequestBody GithubCallbackRequest body) {
+        return Result.ok(githubAuthService.login(body));
     }
 }

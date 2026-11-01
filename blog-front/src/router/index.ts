@@ -81,6 +81,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '找回密码' }
   },
   {
+    path: '/auth/github',
+    name: 'github-landing',
+    component: () => import('@/views/GithubLanding.vue'),
+    meta: { title: 'GitHub 登录' }
+  },
+  {
     path: '/write',
     name: 'write',
     component: () => import('@/views/Write.vue'),

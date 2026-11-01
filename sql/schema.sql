@@ -26,12 +26,15 @@ CREATE TABLE `user` (
   `intro`       VARCHAR(512) NOT NULL DEFAULT ''     COMMENT '个人简介（关于页/侧栏展示）',
   `role`        VARCHAR(20)  NOT NULL DEFAULT 'ADMIN' COMMENT '角色：ADMIN 管理员 / USER 普通用户（预留）',
   `status`      TINYINT      NOT NULL DEFAULT 1      COMMENT '状态：1 启用 / 0 禁用',
+  `github_id`   BIGINT                DEFAULT NULL   COMMENT 'GitHub 账号 ID（OAuth 绑定，NULL 未绑定）',
+  `email_notify` TINYINT      NOT NULL DEFAULT 1      COMMENT '邮件通知开关：1 开 / 0 关（审核结果通知）',
   `deleted`     TINYINT      NOT NULL DEFAULT 0      COMMENT '逻辑删除：0 未删 / 1 已删',
   `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_username` (`username`),
-  UNIQUE KEY `uk_email` (`email`)
+  UNIQUE KEY `uk_email` (`email`),
+  UNIQUE KEY `uk_github_id` (`github_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表';
 
 -- -------------------------------------------------------------

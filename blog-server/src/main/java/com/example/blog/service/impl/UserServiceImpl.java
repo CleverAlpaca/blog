@@ -86,6 +86,9 @@ public class UserServiceImpl implements UserService {
         vo.setAvatar(user.getAvatar());
         vo.setIntro(user.getIntro());
         vo.setEmail(user.getEmail());
+        vo.setGithubId(user.getGithubId());
+        vo.setEmailNotify(user.getEmailNotify());
+        vo.setRole(user.getRole());
         return vo;
     }
 }

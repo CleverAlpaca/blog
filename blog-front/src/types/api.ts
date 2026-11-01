@@ -136,6 +136,10 @@ export interface UserVO {
   email?: string | null
   /** ADMIN / USER */
   role: string
+  /** GitHub 绑定状态（非空=已绑定） */
+  githubId?: number | null
+  /** 邮件通知开关：1 开 / 0 关 */
+  emailNotify?: number
 }
 
 /** 前台登录/注册结果（FrontLoginVO） */

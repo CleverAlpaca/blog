@@ -32,6 +32,12 @@ public class User {
 
     private Integer status;
 
+    /** GitHub 账号 ID（OAuth 绑定，NULL 未绑定） */
+    private Long githubId;
+
+    /** 邮件通知开关：1 开 / 0 关（审核结果通知） */
+    private Integer emailNotify;
+
     @TableLogic
     private Integer deleted;
 

@@ -30,4 +30,7 @@ public interface AuthService {
 
     /** 已登录换绑邮箱（验证新邮箱验证码） */
     void updateEmail(EmailBindRequest request);
+
+    /** 开关邮件通知（审核结果通知，用户级） */
+    void updateNotifySwitch(Boolean enabled);
 }
