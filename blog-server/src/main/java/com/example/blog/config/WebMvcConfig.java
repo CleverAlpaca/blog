@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -17,9 +18,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path base = Paths.get(uploadDir).toAbsolutePath();
-        registry.addResourceHandler("/upload/**")
-                .addResourceLocations(base.toUri().toString());
+        try {
+            Path base = Paths.get(uploadDir).toAbsolutePath();
+            // 启动即创建目录：Path.toUri() 仅对已存在的目录补尾部斜杠，
+            // 缺斜杠会让资源定位拼出 "dir2026/11/x.png" 导致本地图床 404
+            Files.createDirectories(base);
+            String location = base.toUri().toString();
+            if (!location.endsWith("/")) {
+                location += "/";
+            }
+            registry.addResourceHandler("/upload/**")
+                    .addResourceLocations(location);
+        } catch (Exception e) {
+            throw new IllegalStateException("上传目录初始化失败: " + uploadDir, e);
+        }
     }
 
     /**

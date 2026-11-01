@@ -17,3 +17,6 @@ logs/
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 部署本地环境变量（含密码/授权码，不入库）
+deploy/.env

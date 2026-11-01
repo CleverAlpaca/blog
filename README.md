@@ -103,19 +103,27 @@ npm run dev        # http://localhost:5174
 
 ## 生产部署（Docker Compose）
 
+编排文件位于 [`deploy/`](deploy/)：MySQL 8（首次启动自动按序执行 `sql/schema.sql` + `sql/data.sql`）、Redis 7、后端 jar、Nginx（前台 + 后台静态资源 + API 反代 + 图片直出）。
+
 ```bash
-# 1. 构建两个前端产物（nginx 直接挂载 dist 目录）
+# 1. 构建产物：后端 jar + 两个前端 dist（Nginx 直接挂载）
+cd blog-server && mvn -DskipTests package && cd ..
 cd blog-front && npm install && npm run build && cd ..
 cd blog-admin && npm install && npm run build && cd ..
 
-# 2. 一键拉起（MySQL 首次启动自动执行 sql/ 初始化）
+# 2. 配置部署环境变量（MySQL 密码 / 站点地址 / SMTP 邮件）
+cd deploy && cp .env.example .env   # 修改密码与邮箱配置后保存
+
+# 3. 一键拉起（在 deploy/ 目录执行）
 docker compose up -d --build
 ```
 
-- 前台：`http://localhost/`；后台：`http://localhost/admin`；图片：`/upload`
-- MySQL 密码通过环境变量 `MYSQL_ROOT_PASSWORD` 覆盖默认值
-- 数据与上传文件持久化在 `data/` 目录
+- 前台：`http://localhost/`；后台：`http://localhost/admin`；图片：`/upload`（Nginx 直出）
+- 邮件服务：`deploy/.env` 里配置 `MAIL_TYPE=smtp` 与 QQ/163 授权码即发真实邮件；不配置自动退化为日志模拟
+- 图床切换 MinIO/OSS：给 `server` 服务加 `blog.storage.type=oss` 及 OSS 连接参数即可（见设计文档 §7）
+- 数据与上传文件持久化在命名卷 `mysql-data` / `upload` 中
 - 上线后第一件事：登录 `/admin` 修改默认密码
+- 说明：`deploy/.env` 含密码/授权码，已加入 `.gitignore` 不会入库
 
 ## 常见问题
 

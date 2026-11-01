@@ -1,0 +1,93 @@
+# 个人博客系统 · Docker Compose 部署编排
+# 四个服务：MySQL 8（含库表自动初始化）/ Redis 7 / 后端 jar / Nginx（前台+后台静态资源 + API 反代）
+#
+# 使用步骤（宿主机需 Docker 与 Node.js）：
+#   1. 构建产物：mvn -DskipTests package（后端 jar）+ 两个前端 npm run build（产出 dist/）
+#   2. 配置环境：cd deploy && cp .env.example .env 并修改密码/邮箱
+#   3. 启动：docker compose up -d --build   （首次启动 MySQL 自动执行 sql/schema.sql + data.sql）
+#   4. 访问：前台 http://localhost/ ｜ 后台 http://localhost/admin ｜ API http://localhost/api/**
+#
+# 说明：
+#   - 上传目录为共享卷 upload：后端写入、Nginx 直接静态直出（location /upload/）
+#   - 图床切换 MinIO/OSS：server 服务加环境变量 blog.storage.type=oss 及 OSS 连接参数即可（见设计文档 §9）
+#   - .env 中的 MAIL_* 不配置时，邮件自动退化为日志模拟发信
+services:
+  mysql:
+    image: mysql:8
+    container_name: blog-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:?请在 deploy/.env 中设置 MYSQL_PASSWORD}
+      MYSQL_DATABASE: blog
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../sql:/sql:ro
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # 如需宿主机直连数据库可放开端口映射
+    # ports:
+    #   - "3306:3306"
+
+  redis:
+    image: redis:7-alpine
+    container_name: blog-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: blog-server
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      SITE_URL: ${SITE_URL:-http://localhost}
+      UPLOAD_DIR: /app/upload
+      MAIL_TYPE: ${MAIL_TYPE:-log}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-465}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-blog@localhost}
+    volumes:
+      - upload:/app/upload
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: blog-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../blog-front/dist:/usr/share/nginx/front:ro
+      - ../blog-admin/dist:/usr/share/nginx/admin:ro
+      - upload:/usr/share/nginx/upload:ro
+    depends_on:
+      - server
+
+volumes:
+  mysql-data:
+  upload:
