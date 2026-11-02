@@ -191,3 +191,21 @@ CREATE TABLE `site_config` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_config_key` (`config_key`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点配置表';
+
+-- -------------------------------------------------------------
+-- 11. 站内通知表（v2.2：评论/留言通知博主或文章作者）
+-- -------------------------------------------------------------
+CREATE TABLE `notification` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '通知ID',
+  `user_id`     BIGINT       NOT NULL                COMMENT '收件人用户ID（关联 user.id）',
+  `type`        VARCHAR(20)  NOT NULL                COMMENT '类型：comment 文章评论 / message 留言',
+  `title`       VARCHAR(200) NOT NULL                COMMENT '通知标题（如：你的文章《x》有新评论）',
+  `content`     VARCHAR(500) NOT NULL DEFAULT ''     COMMENT '通知摘要（评论/留言内容前 80 字）',
+  `link`        VARCHAR(255) NOT NULL DEFAULT ''     COMMENT '点击跳转的站内路由（如 /article/1）',
+  `is_read`     TINYINT      NOT NULL DEFAULT 0      COMMENT '是否已读：0 未读 / 1 已读',
+  `deleted`     TINYINT      NOT NULL DEFAULT 0      COMMENT '逻辑删除：0 未删 / 1 已删',
+  `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_read` (`user_id`, `is_read`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站内通知表';

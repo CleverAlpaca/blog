@@ -180,6 +180,20 @@ export interface UserHome {
   badge: string
 }
 
+/** 站内通知项（NotificationVO） */
+export interface NotificationItem {
+  id: number
+  /** comment 文章评论 / message 留言 */
+  type: string
+  title: string
+  content: string
+  /** 点击跳转的站内路由 */
+  link: string
+  /** 0 未读 / 1 已读 */
+  isRead: number
+  createTime: string
+}
+
 /** 个人主页评论项（UserCommentVO） */
 export interface UserCommentItem {
   id: number

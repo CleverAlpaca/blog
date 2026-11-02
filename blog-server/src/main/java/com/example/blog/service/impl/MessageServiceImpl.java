@@ -12,6 +12,7 @@ import com.example.blog.entity.User;
 import com.example.blog.mapper.MessageMapper;
 import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.MessageService;
+import com.example.blog.service.NotificationService;
 import com.example.blog.util.RateLimitUtil;
 import com.example.blog.vo.AdminCommentVO;
 import com.example.blog.vo.MessageVO;
@@ -34,6 +35,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageMapper messageMapper;
     private final UserMapper userMapper;
     private final RateLimitUtil rateLimitUtil;
+    private final NotificationService notificationService;
 
     @Override
     public List<MessageVO> tree() {
@@ -76,6 +78,19 @@ public class MessageServiceImpl implements MessageService {
         message.setIp(ip);
         message.setCreateTime(LocalDateTime.now());
         messageMapper.insert(message);
+        // 站内通知：新留言 → 通知博主（启用中的 ADMIN，自己留言不通知自己）
+        List<User> admins = userMapper.selectList(new LambdaQueryWrapper<User>()
+                .eq(User::getRole, "ADMIN")
+                .eq(User::getStatus, 1));
+        for (User admin : admins) {
+            if (admin.getId().equals(userId)) {
+                continue;
+            }
+            notificationService.push(admin.getId(), "message",
+                    "收到新留言",
+                    message.getNickname() + "：" + message.getContent(),
+                    "/message");
+        }
     }
 
     private Long normalizeParentId(Long parentId) {

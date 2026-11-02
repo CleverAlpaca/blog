@@ -15,6 +15,7 @@ import com.example.blog.mapper.ArticleMapper;
 import com.example.blog.mapper.CommentMapper;
 import com.example.blog.mapper.UserMapper;
 import com.example.blog.service.CommentService;
+import com.example.blog.service.NotificationService;
 import com.example.blog.util.RateLimitUtil;
 import com.example.blog.vo.AdminCommentVO;
 import com.example.blog.vo.CommentVO;
@@ -43,6 +44,7 @@ public class CommentServiceImpl implements CommentService {
     private final ArticleMapper articleMapper;
     private final UserMapper userMapper;
     private final RateLimitUtil rateLimitUtil;
+    private final NotificationService notificationService;
 
     @Override
     public List<CommentVO> tree(Long articleId) {
@@ -93,6 +95,13 @@ public class CommentServiceImpl implements CommentService {
         commentMapper.insert(comment);
         articleMapper.update(null, new UpdateWrapper<Article>().eq("id", articleId)
                 .setSql("comment_count = comment_count + 1"));
+        // 站内通知：文章有新评论（含楼内回复）→ 通知文章作者（自己评论自己文章不通知）
+        if (article.getUserId() != null && !article.getUserId().equals(userId)) {
+            notificationService.push(article.getUserId(), "comment",
+                    "你的文章《" + article.getTitle() + "》有新评论",
+                    comment.getNickname() + "：" + comment.getContent(),
+                    "/article/" + articleId);
+        }
     }
 
     /**

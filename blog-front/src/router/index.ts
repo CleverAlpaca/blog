@@ -105,6 +105,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '个人设置', requiresAuth: true }
   },
   {
+    path: '/notifications',
+    name: 'notifications',
+    component: () => import('@/views/Notifications.vue'),
+    meta: { title: '通知中心', requiresAuth: true }
+  },
+  {
     path: '/user/:id',
     name: 'user-home',
     component: () => import('@/views/UserHome.vue'),

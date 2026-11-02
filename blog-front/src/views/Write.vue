@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
@@ -30,6 +30,94 @@ const tags = ref<Tag[]>([])
 const rejectReason = ref('')
 const loading = ref(false)
 const saving = ref(false)
+
+// ---------- 草稿本地快照（v2.2 防丢稿） ----------
+interface DraftSnapshot {
+  title: string
+  summary: string
+  coverImage: string
+  categoryId: number | undefined
+  tagIds: number[]
+  content: string
+  savedAt: string
+}
+const draftKey = computed(() => `write_draft_${editId.value ?? 'new'}`)
+const draftBanner = ref('')
+const draftSnapshot = ref<string | null>(null)
+let suppressAutosave = true // 页面载入/恢复期间不触发自动保存
+let draftTimer: number | undefined
+
+function snapshotOf(): string {
+  return JSON.stringify({
+    title: form.title,
+    summary: form.summary,
+    coverImage: form.coverImage,
+    categoryId: form.categoryId,
+    tagIds: [...form.tagIds],
+    content: form.content
+  })
+}
+
+function writeDraft(): void {
+  if (suppressAutosave) return
+  if (!form.title.trim() && !form.content.trim()) return
+  const snap: DraftSnapshot = { ...JSON.parse(snapshotOf()), savedAt: new Date().toISOString() }
+  localStorage.setItem(draftKey.value, JSON.stringify(snap))
+}
+
+function checkDraft(): void {
+  const raw = localStorage.getItem(draftKey.value)
+  if (!raw) return
+  try {
+    const snap = JSON.parse(raw) as DraftSnapshot
+    const saved = JSON.stringify({
+      title: snap.title,
+      summary: snap.summary,
+      coverImage: snap.coverImage,
+      categoryId: snap.categoryId,
+      tagIds: snap.tagIds,
+      content: snap.content
+    })
+    if (saved === snapshotOf()) return
+    draftSnapshot.value = raw
+    const d = new Date(snap.savedAt)
+    draftBanner.value = `${d.getMonth() + 1} 月 ${d.getDate()} 日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  } catch {
+    localStorage.removeItem(draftKey.value)
+  }
+}
+
+function restoreDraft(): void {
+  const raw = draftSnapshot.value
+  if (!raw) return
+  try {
+    const snap = JSON.parse(raw) as DraftSnapshot
+    suppressAutosave = true
+    form.title = snap.title
+    form.summary = snap.summary
+    form.coverImage = snap.coverImage
+    form.categoryId = snap.categoryId
+    form.tagIds = [...snap.tagIds]
+    form.content = snap.content
+    void nextTick(() => {
+      suppressAutosave = false
+    })
+  } catch {
+    /* 快照损坏则忽略 */
+  }
+  dismissDraft()
+}
+
+function dismissDraft(): void {
+  draftBanner.value = ''
+  draftSnapshot.value = null
+  localStorage.removeItem(draftKey.value)
+}
+
+watch(form, () => {
+  if (draftTimer) window.clearTimeout(draftTimer)
+  draftTimer = window.setTimeout(writeDraft, 2000)
+})
 
 async function loadOptions(): Promise<void> {
   try {
@@ -119,6 +207,7 @@ async function save(action: 'draft' | 'submit'): Promise<void> {
       await createMyArticle(body)
     }
     showSuccess(action === 'submit' ? '已提交审核' : '草稿已保存')
+    localStorage.removeItem(draftKey.value)
     router.push('/my/articles')
   } catch {
     /* 拦截器已提示 */
@@ -127,9 +216,11 @@ async function save(action: 'draft' | 'submit'): Promise<void> {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   void loadOptions()
-  void loadArticle()
+  await loadArticle()
+  suppressAutosave = false
+  checkDraft()
 })
 </script>
 
@@ -137,6 +228,14 @@ onMounted(() => {
   <div class="write-page">
     <div v-if="rejectReason" class="card reject-banner">
       <strong>退回原因：</strong>{{ rejectReason }}（修改后可重新提交审核）
+    </div>
+
+    <div v-if="draftBanner" class="card draft-banner">
+      <span>检测到 {{ draftBanner }} 保存的本地草稿，是否恢复？</span>
+      <span class="draft-actions">
+        <button class="btn btn-primary draft-btn" type="button" @click="restoreDraft">恢复</button>
+        <button class="btn btn-ghost draft-btn" type="button" @click="dismissDraft">丢弃</button>
+      </span>
     </div>
 
     <div class="write-layout">
@@ -286,6 +385,29 @@ onMounted(() => {
   border: 1px solid var(--color-warning);
   color: var(--color-text);
   font-size: 14px;
+}
+
+.draft-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-primary);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.draft-actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.draft-btn {
+  padding: 5px 14px;
+  font-size: 13px;
 }
 
 @media (max-width: 900px) {

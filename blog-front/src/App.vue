@@ -4,14 +4,17 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSiteStore } from '@/stores/site'
 import { useTheme } from '@/composables/useTheme'
 import { useUserStore } from '@/stores/user'
+import { useNotifyStore } from '@/stores/notify'
 import AppIcon from '@/components/AppIcon.vue'
 import AppToast from '@/components/AppToast.vue'
 
 const { theme, toggleTheme } = useTheme()
 const userStore = useUserStore()
+const notifyStore = useNotifyStore()
 
 async function handleLogout(): Promise<void> {
   await userStore.logout()
+  notifyStore.clear()
   router.push('/')
 }
 
@@ -21,7 +24,16 @@ const siteStore = useSiteStore()
 
 onMounted(() => {
   siteStore.load()
+  if (userStore.isLoggedIn) void notifyStore.refresh()
 })
+
+// 登录态下路由切换时刷新未读数（通知页操作后自动同步）
+watch(
+  () => route.path,
+  () => {
+    if (userStore.isLoggedIn) void notifyStore.refresh()
+  }
+)
 
 const navItems = [
   { label: '首页', to: '/', match: (p: string) => p === '/' },
@@ -116,6 +128,10 @@ const year = new Date().getFullYear()
       <template v-if="userStore.isLoggedIn">
         <RouterLink to="/write" class="nav-link">写文章</RouterLink>
         <RouterLink to="/my/articles" class="nav-link">我的投稿</RouterLink>
+        <RouterLink to="/notifications" class="nav-link bell-link" :class="{ active: route.path === '/notifications' }" aria-label="通知中心">
+          <AppIcon name="bell" :size="16" />
+          <span v-if="notifyStore.unread > 0" class="bell-badge">{{ notifyStore.unread > 99 ? '99+' : notifyStore.unread }}</span>
+        </RouterLink>
         <RouterLink to="/settings" class="nav-link" :class="{ active: route.path === '/settings' }">个人设置</RouterLink>
         <button type="button" class="nav-link" @click="handleLogout">退出</button>
       </template>
@@ -151,6 +167,10 @@ const year = new Date().getFullYear()
             <RouterLink class="mobile-link" to="/write">写文章</RouterLink>
             <RouterLink class="mobile-link" to="/my/articles">我的投稿</RouterLink>
             <RouterLink class="mobile-link" :to="`/user/${userStore.user?.id}`">个人主页</RouterLink>
+            <RouterLink class="mobile-link" to="/notifications">
+              通知中心
+              <span v-if="notifyStore.unread > 0" class="mobile-unread">{{ notifyStore.unread > 99 ? '99+' : notifyStore.unread }}</span>
+            </RouterLink>
             <RouterLink class="mobile-link" to="/settings">个人设置</RouterLink>
             <button type="button" class="mobile-link logout" @click="handleLogout">退出登录</button>
           </template>
@@ -488,5 +508,39 @@ const year = new Date().getFullYear()
 
 .footer-rss:hover {
   color: var(--color-primary);
+}
+
+/* 通知铃铛 */
+.bell-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.mobile-unread {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
 }
 </style>
