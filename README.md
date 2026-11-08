@@ -26,22 +26,37 @@
 
 ```
 blog/
-├── docs/设计文档.md        # 设计文档（架构 / 数据库 / API / 部署 / 里程碑）
+├── docs/                   # 设计文档（架构/数据库/API/部署/迭代清单）+ 各迭代评审文档
+│   └── 设计文档.md
 ├── sql/
-│   ├── schema.sql          # 建库建表（9 张表）
+│   ├── schema.sql          # 建库建表（11 张表）
 │   └── data.sql            # 种子数据（管理员/分类/标签/示例文章/友链/评论）
 ├── blog-server/            # 后端 Spring Boot 3（端口 8080）
 ├── blog-front/             # 前台门户（dev 端口 5173）
 ├── blog-admin/             # 后台管理（dev 端口 5174）
-├── deploy/nginx.conf       # 生产 Nginx 配置
-└── docker-compose.yml      # 生产编排（mysql/redis/server/nginx）
+└── deploy/                 # 生产部署
+    ├── Dockerfile          # 后端镜像（temurin 17 + jar）
+    ├── docker-compose.yml  # 编排（mysql/redis/server/nginx）
+    ├── nginx.conf          # Nginx（静态 + API 反代 + 图片直出）
+    ├── .env.example        # 部署环境变量样例（密码/SMTP/GitHub OAuth）
+    └── backup/             # MySQL 备份脚本 + 恢复说明
 ```
 
-## 功能一览（标准版）
+## 功能一览
+
+**基础（v1.0 标准版）**
 
 - **前台**：文章列表/详情（Markdown 渲染 + 代码高亮 + 目录）、点赞、评论（两级）、搜索、归档、分类、标签、留言板、友链、关于、站点统计
-- **后台**：登录（Sa-Token + BCrypt）、数据看板、文章管理（md-editor-v3 编辑器、图片上传、草稿/发布/下架、置顶）、分类/标签/评论/留言/友链管理、个人资料与改密
-- **特色机制**：浏览量 Redis 缓冲 + 定时落库、点赞防重（唯一键 + 开关语义）、评论/留言 IP 限频、上传文件头校验、逻辑删除
+- **后台**：登录（Sa-Token + BCrypt）、数据看板、文章管理（md-editor-v3 编辑器、图片上传、草稿/发布/下架、置顶）、分类/标签/评论/留言/友链管理
+- **机制**：浏览量 Redis 缓冲 + 定时落库、点赞防重（唯一键 + 开关语义）、评论/留言 IP 限频、上传文件头校验、逻辑删除
+
+**迭代交付（v1.1 ~ v2.2）**
+
+- **体验增强**：数据看板图表化（ECharts）、暗黑模式、RSS 订阅、SEO（meta/sitemap/robots）、站点可视化配置、MySQL FULLTEXT 中文全文检索、OSS/MinIO 图床
+- **多用户社区**：注册/登录（BCrypt + 限频）、投稿审核制（通过/退回附原因）、个人主页、用户管理（封禁即踢/重置密码）、个人设置（头像上传/资料/换绑邮箱/改密）
+- **账号与消息**：邮箱验证码注册、找回密码、换绑邮箱、GitHub OAuth 登录/绑定、审核结果邮件通知（用户级开关）、站内通知中心（页头铃铛未读 + 通知页）
+- **创作与运维保障**：编辑器草稿本地自动保存/恢复、MySQL 定时备份脚本（保留 30 份）与恢复方案
+- **部署**：Docker Compose 一键编排（MySQL 自动初始化/Redis/后端/Nginx），SMTP 与 GitHub OAuth 全环境变量配置
 
 ## 环境要求
 
@@ -120,6 +135,8 @@ docker compose up -d --build
 
 - 前台：`http://localhost/`；后台：`http://localhost/admin`；图片：`/upload`（Nginx 直出）
 - 邮件服务：`deploy/.env` 里配置 `MAIL_TYPE=smtp` 与 QQ/163 授权码即发真实邮件；不配置自动退化为日志模拟
+- GitHub 登录：`deploy/.env` 配置 `GITHUB_CLIENT_ID/SECRET`（OAuth App callback 填 `http://localhost/auth/github`）；不配置时点击该入口会提示未配置
+- 数据备份/恢复：见 [deploy/backup/README.md](deploy/backup/README.md)（计划任务 + 恢复命令）
 - 图床切换 MinIO/OSS：给 `server` 服务加 `blog.storage.type=oss` 及 OSS 连接参数即可（见设计文档 §7）
 - 数据与上传文件持久化在命名卷 `mysql-data` / `upload` 中
 - 上线后第一件事：登录 `/admin` 修改默认密码
@@ -135,12 +152,22 @@ docker compose up -d --build
 | 评论报「操作太频繁」 | IP 限频：每分钟 5 条，属预期行为 |
 | 文章详情浏览量不同步 | 浏览量先进 Redis，每 10 分钟定时落库一次 |
 
-## 里程碑状态
+## 迭代状态
 
-| 里程碑 | 状态 |
+| 阶段 | 状态 |
 | --- | --- |
-| M1 工程骨架（三工程 + 统一响应/异常 + 登录鉴权） | ✅ |
-| M2 文章管理闭环（编辑器/上传/前台渲染/浏览量落库） | ✅ |
-| M3 互动与完整页面（评论/点赞/搜索/归档/友链/看板） | ✅ |
-| M4 部署（Dockerfile / docker-compose / nginx） | ✅ |
-| 进阶迭代（OSS 图床 / 暗黑模式 / RSS / SEO / 全文检索） | 待规划（见设计文档附录 B） |
+| M1~M4 标准版（工程骨架 / 文章闭环 / 互动与完整页面 / 部署） | ✅ |
+| v1.1 看板图表化（ECharts）+ Element Plus 按需引入 | ✅ |
+| v1.2 OSS/MinIO 图床 + 暗黑模式 + RSS 订阅 | ✅ |
+| v1.3 SEO 优化（meta / sitemap / robots） | ✅ |
+| v1.4 站点配置表（后台可视化配置 → 前台联动） | ✅ |
+| v1.5 MySQL FULLTEXT 中文全文检索 | ✅ |
+| v1.6 多用户社区化（注册/投稿审核/个人主页/用户管理） | ✅ |
+| 个人设置页（头像上传/资料/换绑邮箱/修改密码） | ✅ |
+| 打包 + Docker Compose 部署编排（含本地图床 404 修复） | ✅ |
+| v2.0 邮件服务（注册邮箱验证/找回密码/换绑邮箱） | ✅ |
+| v2.1 消息通知与 GitHub 登录（审核邮件通知/通知开关/OAuth） | ✅ |
+| v2.2 站内通知中心 + 草稿自动保存 + MySQL 定时备份 | ✅ |
+| v2.3 站内通知扩展（通知类型扩展/中心增强/未读轮询） | 📝 评审中 |
+
+> 各阶段设计与决策详见 [docs/设计文档.md](docs/设计文档.md) 附录 B 及对应评审文档。
